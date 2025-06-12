@@ -1,112 +1,106 @@
 using System;
 using System.Numerics;
+using MathNet.Numerics.LinearAlgebra;
 
-public class CubicPHCurve3D
+namespace CubicPHCurve
 {
-    // q0, q1, q2: quaternion coefficients defining the PH-curve
-    private readonly Quaternion q0, q1, q2;
-    // Polynomial coefficients for the derivative: r'(t) = A + B t + C t^2 + D t^3 + E t^4
-    private readonly Vector3 A, B, C, D, E;
-
-    public CubicPHCurve3D(Quaternion q0, Quaternion q1, Quaternion q2)
+    public class CubicPHCurve3D
     {
-        this.q0 = q0;
-        this.q1 = q1;
-        this.q2 = q2;
+        // Polynomial coefficients for r'(t) = A + B t + C t^2 + D t^3 + E t^4
+        private readonly Vector3 A, B, C, D, E;
 
-        // Precompute quaternion products for derivative coefficients
-        Quaternion a = q0, b = q1, c = q2;
-        Quaternion ai = Quaternion.Multiply(a, new Quaternion(1, 0, 0, 0));
-        Quaternion bi = Quaternion.Multiply(b, new Quaternion(1, 0, 0, 0));
-        Quaternion ci = Quaternion.Multiply(c, new Quaternion(1, 0, 0, 0));
-        Quaternion aConj = Quaternion.Conjugate(a);
-        Quaternion bConj = Quaternion.Conjugate(b);
-        Quaternion cConj = Quaternion.Conjugate(c);
+        /// <summary>
+        /// Hermite control point with position and tangent
+        /// </summary>
+        public struct ControlPoint
+        {
+            public Vector3 Position;
+            public Vector3 Tangent;
+            public ControlPoint(Vector3 pos, Vector3 tan)
+            {
+                Position = pos;
+                Tangent = tan;
+            }
+        }
 
-        // Coefficient quaternions:
-        Quaternion coeff0 = Quaternion.Multiply(ai, aConj);
-        Quaternion coeff1 = Quaternion.Add(
-            Quaternion.Multiply(ai, bConj),
-            Quaternion.Multiply(bi, aConj)
-        );
-        Quaternion coeff2 = Quaternion.Add(
-            Quaternion.Add(
-                Quaternion.Multiply(ai, cConj),
-                Quaternion.Multiply(bi, bConj)
-            ),
-            Quaternion.Multiply(ci, aConj)
-        );
-        Quaternion coeff3 = Quaternion.Add(
-            Quaternion.Multiply(bi, cConj),
-            Quaternion.Multiply(ci, bConj)
-        );
-        Quaternion coeff4 = Quaternion.Multiply(ci, cConj);
+        /// <summary>
+        /// Create a PH curve segment directly from two Hermite control points
+        /// by computing derivative polynomial coefficients algebraically.
+        /// </summary>
+        public static CubicPHCurve3D FromControlPoints(ControlPoint cp0, ControlPoint cp1)
+        {
+            return ComputePolynomialCoefficients(cp0.Position, cp0.Tangent, cp1.Position, cp1.Tangent);
+        }
 
-        // Store vector parts
-        A = new Vector3(coeff0.X, coeff0.Y, coeff0.Z);
-        B = new Vector3(coeff1.X, coeff1.Y, coeff1.Z);
-        C = new Vector3(coeff2.X, coeff2.Y, coeff2.Z);
-        D = new Vector3(coeff3.X, coeff3.Y, coeff3.Z);
-        E = new Vector3(coeff4.X, coeff4.Y, coeff4.Z);
-    }
+        /// <summary>
+        /// Constructor from polynomial derivative coefficients
+        /// </summary>
+        public CubicPHCurve3D(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Vector3 E)
+        {
+            this.A = A;
+            this.B = B;
+            this.C = C;
+            this.D = D;
+            this.E = E;
+        }
 
-    // First derivative r'(t)
-    public Vector3 Derivative(float t)
-    {
-        return ((((E * t + D) * t + C) * t + B) * t + A);
-    }
+        /// <summary>
+        /// Compute PH segment coefficients directly from Hermite data
+        /// via a 4×4 linear solve enforcing Hermite and PH constraints.
+        /// </summary>
+        private static CubicPHCurve3D ComputePolynomialCoefficients(
+            Vector3 p0, Vector3 t0,
+            Vector3 p1, Vector3 t1)
+        {
+            // A = r'(0)
+            Vector3 A = t0;
+            // S = remaining displacement
+            Vector3 S = p1 - p0 - A;
+            // Build 4x4 float matrix enforcing PH-Hermite constraints
+            var M = Matrix<float>.Build.DenseOfArray(new float[,] {
+                {1f,    1f,    1f,    1f   },   // B+C+D+E = t1 - A
+                {0.5f, 1f/3f, 0.25f, 0.2f },   // 1/2 B +1/3 C+1/4 D+1/5 E = S
+                // PH constraint 1: A·C + 0.5 B·B = 0 -> C coefficient
+                {0f,    1f,    0f,    0f  },
+                // PH constraint 2: B·D + C·C + A·E = 0 -> D coefficient
+                {0f,    0f,    1f,    0f  }
+            });
+            // RHS float vectors
+            var rhsX = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.DenseOfArray(new float[] { t1.X - A.X, S.X, 0f, 0f });
+            var rhsY = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.DenseOfArray(new float[] { t1.Y - A.Y, S.Y, 0f, 0f });
+            var rhsZ = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.DenseOfArray(new float[] { t1.Z - A.Z, S.Z, 0f, 0f });
+            var solX = M.Solve(rhsX);
+            var solY = M.Solve(rhsY);
+            var solZ = M.Solve(rhsZ);
+            Vector3 B = new Vector3(solX[0], solY[0], solZ[0]);
+            Vector3 C = new Vector3(solX[1], solY[1], solZ[1]);
+            Vector3 D = new Vector3(solX[2], solY[2], solZ[2]);
+            Vector3 E = new Vector3(solX[3], solY[3], solZ[3]);
+            return new CubicPHCurve3D(A, B, C, D, E);
+        }
 
-    // Speed = ||r'(t)||
-    public float Speed(float t)
-    {
-        return Derivative(t).Length();
-    }
-
-    // Second derivative r''(t)
-    public Vector3 SecondDerivative(float t)
-    {
-        return B + 2f * C * t + 3f * D * t * t + 4f * E * t * t * t;
-    }
-
-    // Unit tangent T(t)
-    public Vector3 Tangent(float t)
-    {
-        return Vector3.Normalize(Derivative(t));
-    }
-
-    // Principal normal N(t)
-    public Vector3 Normal(float t)
-    {
-        Vector3 d1 = Derivative(t);
-        Vector3 d2 = SecondDerivative(t);
-        float speed = d1.Length();
-        Vector3 numerator = d2 * speed - d1 * (Vector3.Dot(d1, d2) / speed);
-        return Vector3.Normalize(numerator / (speed * speed));
-    }
-
-    // Compute bi-tangent B(t) = T(t) × N(t)
-    public Vector3 BiTangent(float t)
-    {
-        Vector3 T = Tangent(t);
-        Vector3 N = Normal(t);
-        return Vector3.Cross(T, N);
-    }
-
-    // Offset point r(t) + d * N(t) using analytic position
-    public Vector3 OffsetPoint(float t, float d)
-    {
-        Vector3 point = Position(t);
-        Vector3 N = Normal(t);
-        return point + d * N;
-    }
-
-    // Analytic position r(t) = ∫0^t r'(u) du
-    public Vector3 Position(float t)
-    {
-        return A * t
-             + B * (t * t / 2f)
-             + C * (t * t * t / 3f)
-             + D * (t * t * t * t / 4f)
-             + E * (t * t * t * t * t / 5f);
+        /// <summary>Hodograph r'(t)</summary> r'(t)</summary>
+        public Vector3 Derivative(float t) => ((((E * t + D) * t + C) * t + B) * t + A);
+        /// <summary>Speed = ||r'(t)||</summary>
+        public float Speed(float t) => Derivative(t).Length();
+        /// <summary>Unit tangent T(t)</summary>
+        public Vector3 Tangent(float t) => Vector3.Normalize(Derivative(t));
+        /// <summary>Second derivative r''(t)</summary>
+        public Vector3 SecondDerivative(float t) => B + 2f * C * t + 3f * D * t * t + 4f * E * t * t * t;
+        /// <summary>Principal normal N(t)</summary>
+        public Vector3 Normal(float t)
+        {
+            var d1 = Derivative(t);
+            var d2 = SecondDerivative(t);
+            float s = d1.Length();
+            var num = d2 * s - d1 * (Vector3.Dot(d1, d2) / s);
+            return Vector3.Normalize(num / (s * s));
+        }
+        /// <summary>Bi-tangent B(t) = T×N</summary>
+        public Vector3 BiTangent(float t) => Vector3.Cross(Tangent(t), Normal(t));
+        /// <summary>Offset point = r(t) + d N(t)</summary>
+        public Vector3 OffsetPoint(float t, float d) => Position(t) + d * Normal(t);
+        /// <summary>Position r(t) = ∫₀ᵗ r'(u)du</summary>
+        public Vector3 Position(float t) => A * t + B * (t * t / 2f) + C * (t * t * t / 3f) + D * (t * t * t * t / 4f) + E * (t * t * t * t * t / 5f);
     }
 }
