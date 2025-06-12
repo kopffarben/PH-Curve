@@ -8,6 +8,8 @@ namespace CubicPHCurve
     {
         // Polynomial coefficients for r'(t) = A + B t + C t^2 + D t^3 + E t^4
         private readonly Vector3 A, B, C, D, E;
+        // Start position of the curve
+        private readonly Vector3 P0;
         // Quaternion representation of the unit X basis vector
         private static readonly Quaternion BasisI = new(1f, 0f, 0f, 0f);
 
@@ -73,19 +75,34 @@ namespace CubicPHCurve
         /// </summary>
         public static CubicPHCurve3D FromControlPoints(ControlPoint cp0, ControlPoint cp1)
         {
-            return ComputePolynomialCoefficientsQuaternion(cp0, cp1);
+            Vector3 delta = cp1.Position - cp0.Position;
+            Vector3 A = cp0.Tangent;
+            Vector3 S = cp1.Tangent - cp0.Tangent;
+            Vector3 T = delta - cp0.Tangent;
+            Vector3 B = 6f * T - 2f * S;
+            Vector3 C = 3f * S - 6f * T;
+            return new CubicPHCurve3D(A, B, C, Vector3.Zero, Vector3.Zero, cp0.Position);
         }
 
         /// <summary>
         /// Constructor from polynomial derivative coefficients
         /// </summary>
-        public CubicPHCurve3D(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Vector3 E)
+        public CubicPHCurve3D(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Vector3 E, Vector3 start)
         {
             this.A = A;
             this.B = B;
             this.C = C;
             this.D = D;
             this.E = E;
+            this.P0 = start;
+        }
+
+        /// <summary>
+        /// Constructor from polynomial derivative coefficients with start position at the origin.
+        /// </summary>
+        public CubicPHCurve3D(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Vector3 E)
+            : this(A, B, C, D, E, Vector3.Zero)
+        {
         }
 
         /// <summary>
@@ -175,7 +192,8 @@ namespace CubicPHCurve
         public Vector3 BiTangent(float t) => Vector3.Cross(Tangent(t), Normal(t));
         /// <summary>Offset point = r(t) + d N(t)</summary>
         public Vector3 OffsetPoint(float t, float d) => Position(t) + d * Normal(t);
-        /// <summary>Position r(t) = ∫₀ᵗ r'(u)du</summary>
-        public Vector3 Position(float t) => A * t + B * (t * t / 2f) + C * (t * t * t / 3f) + D * (t * t * t * t / 4f) + E * (t * t * t * t * t / 5f);
+        /// <summary>Position r(t) = P0 + ∫₀ᵗ r'(u)du</summary>
+        public Vector3 Position(float t) =>
+            P0 + A * t + B * (t * t / 2f) + C * (t * t * t / 3f) + D * (t * t * t * t / 4f) + E * (t * t * t * t * t / 5f);
     }
 }
