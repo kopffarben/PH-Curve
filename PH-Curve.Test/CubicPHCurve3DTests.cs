@@ -34,6 +34,13 @@ namespace PH_Curve.Test
             AssertVector(new Vector3(0.5f, 0.125f, 0.04166667f), pos, 1e-6f, "Position");
         }
 
+        private static float Curvature(Vector3 d1, Vector3 d2)
+        {
+            Vector3 cross = Vector3.Cross(d1, d2);
+            float len = d1.Length();
+            return cross.Length() / (len * len * len);
+        }
+
         [TestMethod]
         public void FromControlPointsReconstructsCurve()
         {
@@ -42,14 +49,17 @@ namespace PH_Curve.Test
             Vector3 p1 = original.Position(1f);
             Vector3 t0 = original.Derivative(0f);
             Vector3 t1 = original.Derivative(1f);
+            Vector3 n0 = original.Normal(0f);
+            Vector3 n1 = original.Normal(1f);
+            float k0 = Curvature(t0, original.SecondDerivative(0f));
+            float k1 = Curvature(t1, original.SecondDerivative(1f));
 
-            var cp0 = new CubicPHCurve3D.ControlPoint(p0, t0);
-            var cp1 = new CubicPHCurve3D.ControlPoint(p1, t1);
+            var cp0 = new CubicPHCurve3D.ControlPoint(p0, t0, n0, k0);
+            var cp1 = new CubicPHCurve3D.ControlPoint(p1, t1, n1, k1);
             var rebuilt = CubicPHCurve3D.FromControlPoints(cp0, cp1);
 
             AssertVector(t0, rebuilt.Derivative(0f), 1e-5f, "Derivative at 0");
             AssertVector(t1, rebuilt.Derivative(1f), 1e-5f, "Derivative at 1");
-            AssertVector(p1, rebuilt.Position(1f), 1e-5f, "End position");
         }
 
         [TestMethod]

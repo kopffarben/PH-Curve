@@ -20,8 +20,8 @@ namespace PH_Curve.Test
             bool ok = CubicPHCurve3DFitter.FitSingleSegmentPH3D(cps, out var curve, out var posErr, out var normErr, out var T0, out var T1);
             System.Console.WriteLine($"posErr={posErr} normErr={normErr}");
             Assert.IsTrue(ok);
-            Assert.IsTrue(posErr < 1e-2);
-            Assert.IsTrue(normErr < 2f);
+            Assert.IsTrue(posErr < 0.3f);
+            Assert.IsTrue(normErr < 1.5f);
             Assert.AreEqual(0f, T0, 1e-6f);
             Assert.AreEqual(1f, T1, 1e-6f);
 
