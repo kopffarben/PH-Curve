@@ -8,7 +8,8 @@ namespace CubicPHCurve
     {
         // Polynomial coefficients for r'(t) = A + B t + C t^2 + D t^3 + E t^4
         private readonly Vector3 A, B, C, D, E;
-        private static readonly Quaternion BasisI = new(0f, 1f, 0f, 0f);
+        // Quaternion representation of the unit X basis vector
+        private static readonly Quaternion BasisI = new(1f, 0f, 0f, 0f);
 
         /// <summary>
         /// Hermite control point used to construct the curve.
@@ -121,16 +122,16 @@ namespace CubicPHCurve
                 M[3,j] = col1.X; M[4,j]=col1.Y; M[5,j]=col1.Z;
             }
 
-            Quaternion K = 2f * q1 - 2f * q0;
+            Quaternion K = Scale(q1, 2f) - Scale(q0, 2f);
             Vector3 const1 = V(K*BasisI*Quaternion.Conjugate(q1) + q1*BasisI*Quaternion.Conjugate(K));
 
-            var b = Vector<float>.Build.Dense(new float[]
+            var b = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[]
             {
                 k0Vec.X*0.5f, k0Vec.Y*0.5f, k0Vec.Z*0.5f,
                 k1Vec.X*0.5f - const1.X, k1Vec.Y*0.5f - const1.Y, k1Vec.Z*0.5f - const1.Z
             });
 
-            Vector<float> x = M.Svd(true).Solve(b);
+            MathNet.Numerics.LinearAlgebra.Vector<float> x = M.Svd(true).Solve(b);
 
             Quaternion qd1 = new(x[0], x[1], x[2], x[3]);
             Quaternion qd2 = q1 - q0 - qd1;
