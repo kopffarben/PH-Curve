@@ -12,29 +12,29 @@ namespace PH_Curve.Test
         {
             var cps = new[]
             {
-                new CubicPHCurve3DFitter.ControlPointEx
+                new CubicPHCurve3D.ControlPoint
                 {
                     Position = new Vector3(0,0,0),
                     Tangent = new Vector3(2,2,0),
-                    Time = 0f,
                     Normal = Vector3.UnitZ,
-                    Curvature = 0f
+                    Curvature = 0f,
+                    Time = 0f
                 },
-                new CubicPHCurve3DFitter.ControlPointEx
+                new CubicPHCurve3D.ControlPoint
                 {
                     Position = new Vector3(1,1,0),
                     Tangent = new Vector3(0,0,0),
-                    Time = 0.5f,
                     Normal = Vector3.UnitZ,
-                    Curvature = 0f
+                    Curvature = 0f,
+                    Time = 0.5f
                 },
-                new CubicPHCurve3DFitter.ControlPointEx
+                new CubicPHCurve3D.ControlPoint
                 {
                     Position = new Vector3(2,0,0),
                     Tangent = new Vector3(2,-2,0),
-                    Time = 1f,
                     Normal = Vector3.UnitZ,
-                    Curvature = 0f
+                    Curvature = 0f,
+                    Time = 1f
                 }
             };
 
@@ -48,7 +48,7 @@ namespace PH_Curve.Test
 
             // check velocity utility
             float midT = (T0 + T1) * 0.5f;
-            Vector3 vel = PHCurveTimeUtils.VelocityAtTime(curve, midT, T0, T1);
+            Vector3 vel = curve.VelocityAtTime(midT, T0, T1);
             Vector3 deriv = curve.Derivative(0.5f) / (T1 - T0);
             Assert.IsTrue(Vector3.Distance(vel, deriv) < 1e-4f);
         }
@@ -91,9 +91,9 @@ namespace PH_Curve.Test
 
             var cps = new[]
             {
-                new CubicPHCurve3DFitter.ControlPointEx{Position=p0, Tangent=t0, Time=0f, Normal=n0, Curvature=k0},
-                new CubicPHCurve3DFitter.ControlPointEx{Position=pMid, Tangent=tMid, Time=0.5f, Normal=nMid, Curvature=kMid},
-                new CubicPHCurve3DFitter.ControlPointEx{Position=p1, Tangent=t1, Time=1f, Normal=n1, Curvature=k1}
+                new CubicPHCurve3D.ControlPoint{Position=p0, Tangent=t0, Normal=n0, Curvature=k0, Time=0f},
+                new CubicPHCurve3D.ControlPoint{Position=pMid, Tangent=tMid, Normal=nMid, Curvature=kMid, Time=0.5f},
+                new CubicPHCurve3D.ControlPoint{Position=p1, Tangent=t1, Normal=n1, Curvature=k1, Time=1f}
             };
 
             bool ok = CubicPHCurve3DFitter.FitSingleSegmentPH3D(cps, out var curve, out var posErr, out var normErr, out var T0, out var T1);
@@ -106,27 +106,27 @@ namespace PH_Curve.Test
             Assert.IsTrue(Vector3.Distance(curve.Derivative(1f), t1) < 1e-6f);
 
             float midT = (T0 + T1) * 0.5f;
-            Vector3 vel = PHCurveTimeUtils.VelocityAtTime(curve, midT, T0, T1);
+            Vector3 vel = curve.VelocityAtTime(midT, T0, T1);
             Vector3 deriv = curve.Derivative(0.5f) / (T1 - T0);
             Assert.IsTrue(Vector3.Distance(vel, deriv) < 1e-4f);
         }
 
-        private static CubicPHCurve3DFitter.ControlPointEx[] SampleCurve(int count)
+        private static CubicPHCurve3D.ControlPoint[] SampleCurve(int count)
         {
             var curve = CreateSampleCurve();
-            var cps = new CubicPHCurve3DFitter.ControlPointEx[count];
+            var cps = new CubicPHCurve3D.ControlPoint[count];
             for (int i = 0; i < count; ++i)
             {
                 float t = (float)i / (count - 1);
                 Vector3 d1 = curve.Derivative(t);
                 Vector3 d2 = curve.SecondDerivative(t);
-                cps[i] = new CubicPHCurve3DFitter.ControlPointEx
+                cps[i] = new CubicPHCurve3D.ControlPoint
                 {
                     Position = curve.Position(t),
                     Tangent = d1,
-                    Time = t,
                     Normal = curve.Normal(t),
-                    Curvature = Curvature(d1, d2)
+                    Curvature = Curvature(d1, d2),
+                    Time = t
                 };
             }
             return cps;

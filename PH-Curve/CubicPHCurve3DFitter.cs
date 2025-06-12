@@ -7,25 +7,9 @@ namespace CubicPHCurve
 {
     public class CubicPHCurve3DFitter
     {
-        /// <summary>
-        /// Control point used for fitting including time and normal information.
-        /// </summary>
-        public struct ControlPointEx
-        {
-            /// <summary>Spatial position of the point.</summary>
-            public Vector3 Position;
-            /// <summary>Tangent vector at the point.</summary>
-            public Vector3 Tangent;
-            /// <summary>Absolute time parameter of the point.</summary>
-            public float Time;
-            /// <summary>Normal vector at the point.</summary>
-            public Vector3 Normal;
-            /// <summary>Curvature at the point.</summary>
-            public float Curvature;
-        }
 
         public static bool FitSingleSegmentPH3D(
-            ControlPointEx[] cps,
+            CubicPHCurve3D.ControlPoint[] cps,
             out CubicPHCurve3D fitted,
             out float rmsPosError,
             out float rmsNormError,
@@ -79,22 +63,6 @@ namespace CubicPHCurve
             rmsNormError = (float)Math.Sqrt(sumNorm2 / N);
 
             return true;
-        }
-    }
-
-    public static class PHCurveTimeUtils
-    {
-        public static Vector3 VelocityAtTime(CubicPHCurve3D curve, float T, float T0, float T1)
-        {
-            float tParam = (T - T0) / (T1 - T0);
-            Vector3 dr_dtp = curve.Derivative(tParam);
-            float invDur = 1.0f / (T1 - T0);
-            return dr_dtp * invDur;
-        }
-
-        public static float SpeedAtTime(CubicPHCurve3D curve, float T, float T0, float T1)
-        {
-            return VelocityAtTime(curve, T, T0, T1).Length();
         }
     }
 }
