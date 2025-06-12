@@ -75,17 +75,60 @@ namespace CubicPHCurve
 
         /// <summary>
         /// Create a PH curve segment directly from two Hermite control points
-        /// by computing derivative polynomial coefficients algebraically.
+        /// taking tangent, normal and curvature information at both ends into
+        /// account. The implementation follows the quaternion formulation of
+        /// cubic PH curves. The resulting curve starts at <paramref name="cp0"/>
+        /// and its derivative satisfies all <c>G²</c> constraints. The end
+        /// position is implied by the PH formulation and may differ slightly
+        /// from <paramref name="cp1"/> if the provided data is inconsistent.
         /// </summary>
         public static CubicPHCurve3D FromControlPoints(ControlPoint cp0, ControlPoint cp1)
         {
-            Vector3 delta = cp1.Position - cp0.Position;
-            Vector3 A = cp0.Tangent;
-            Vector3 S = cp1.Tangent - cp0.Tangent;
-            Vector3 T = delta - cp0.Tangent;
-            Vector3 B = 6f * T - 2f * S;
-            Vector3 C = 3f * S - 6f * T;
-            return new CubicPHCurve3D(A, B, C, Vector3.Zero, Vector3.Zero, cp0.Position);
+            Vector3 t0 = cp0.Tangent;
+            Vector3 t1 = cp1.Tangent;
+
+            Quaternion q0 = QuaternionFromDerivative(t0, cp0.Normal);
+            Quaternion q1 = QuaternionFromDerivative(t1, cp1.Normal);
+
+            Vector3 k0Vec = cp0.Curvature * t0.LengthSquared() *
+                (cp0.Normal == Vector3.Zero ? Vector3.UnitY : Vector3.Normalize(cp0.Normal));
+            Vector3 k1Vec = cp1.Curvature * t1.LengthSquared() *
+                (cp1.Normal == Vector3.Zero ? Vector3.UnitY : Vector3.Normalize(cp1.Normal));
+
+            Quaternion[] basis =
+            {
+                new Quaternion(1f, 0f, 0f, 0f),
+                new Quaternion(0f, 1f, 0f, 0f),
+                new Quaternion(0f, 0f, 1f, 0f),
+                new Quaternion(0f, 0f, 0f, 1f)
+            };
+
+            var M = Matrix<float>.Build.Dense(6, 4);
+            for (int j = 0; j < 4; ++j)
+            {
+                Quaternion e = basis[j];
+                Vector3 col0 = V(e * BasisI * Quaternion.Conjugate(q0) + q0 * BasisI * Quaternion.Conjugate(e));
+                Vector3 col1 = V(-e * BasisI * Quaternion.Conjugate(q1) - q1 * BasisI * Quaternion.Conjugate(e));
+                M[0, j] = col0.X; M[1, j] = col0.Y; M[2, j] = col0.Z;
+                M[3, j] = col1.X; M[4, j] = col1.Y; M[5, j] = col1.Z;
+            }
+
+            Quaternion K = Scale(q1, 2f) - Scale(q0, 2f);
+            Vector3 const1 = V(K * BasisI * Quaternion.Conjugate(q1) + q1 * BasisI * Quaternion.Conjugate(K));
+
+            var b = Vector<float>.Build.Dense(new float[]
+            {
+                k0Vec.X * 0.5f, k0Vec.Y * 0.5f, k0Vec.Z * 0.5f,
+                k1Vec.X * 0.5f - const1.X, k1Vec.Y * 0.5f - const1.Y, k1Vec.Z * 0.5f - const1.Z
+            });
+
+            Vector<float> x = M.Svd(true).Solve(b);
+
+            Quaternion qd1 = new(x[0], x[1], x[2], x[3]);
+            Quaternion qd2 = q1 - q0 - qd1;
+
+            var coeffs = DerivativeCoefficientsFromQuaternions(q0, qd1, qd2);
+            return new CubicPHCurve3D(coeffs.A, coeffs.B, coeffs.C, coeffs.D, coeffs.E, cp0.Position);
         }
 
         /// <summary>
