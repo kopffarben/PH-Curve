@@ -12,9 +12,9 @@ namespace PH_Curve.Test
         {
             var cps = new[]
             {
-                new CubicPHCurve3DFitter.ControlPointEx{Position=new Vector3(0,0,0), Time=0f, Normal=Vector3.UnitZ},
-                new CubicPHCurve3DFitter.ControlPointEx{Position=new Vector3(1,1,0), Time=0.5f, Normal=Vector3.UnitZ},
-                new CubicPHCurve3DFitter.ControlPointEx{Position=new Vector3(2,0,0), Time=1f, Normal=Vector3.UnitZ}
+                new CubicPHCurve3DFitter.ControlPointEx{Position=new Vector3(0,0,0), Time=0f, Normal=Vector3.UnitZ, Curvature=0f},
+                new CubicPHCurve3DFitter.ControlPointEx{Position=new Vector3(1,1,0), Time=0.5f, Normal=Vector3.UnitZ, Curvature=0f},
+                new CubicPHCurve3DFitter.ControlPointEx{Position=new Vector3(2,0,0), Time=1f, Normal=Vector3.UnitZ, Curvature=0f}
             };
 
             bool ok = CubicPHCurve3DFitter.FitSingleSegmentPH3D(cps, out var curve, out var posErr, out var normErr, out var T0, out var T1);
