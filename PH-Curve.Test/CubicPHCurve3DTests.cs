@@ -110,6 +110,15 @@ namespace PH_Curve.Test
 
             Vector3 offset = curve.OffsetPoint(t, 1f);
             AssertVector(new Vector3(0f, 1f, 0f), offset, 1e-6f, "Offset point");
+
+            float curvature = curve.Curvature(t);
+            Assert.AreEqual(1f, curvature, 1e-6f, "Curvature at t=0");
+
+            Vector3 vel = curve.VelocityAtTime(t, 0f, 1f);
+            AssertVector(curve.Derivative(t), vel, 1e-6f, "Velocity at t=0");
+
+            float speedAbs = curve.SpeedAtTime(t, 0f, 1f);
+            Assert.AreEqual(speed, speedAbs, 1e-6f, "Speed at absolute time");
         }
     }
 }

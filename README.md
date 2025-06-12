@@ -46,5 +46,5 @@ Vector3 position = curve.Position(0.5f);
 Vector3 tangent = curve.Tangent(0.5f);
 ```
 
-The above snippet creates a PH curve segment from two Hermite points and queries its midpoint position and tangent.
+The above snippet creates a PH curve segment from two Hermite points and queries its midpoint position and tangent. The `ControlPoint` struct also stores an optional absolute time value which can be used during curve fitting.
 

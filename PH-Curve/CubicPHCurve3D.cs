@@ -26,6 +26,8 @@ namespace CubicPHCurve
             public Vector3 Normal;
             /// <summary>Optional curvature value.</summary>
             public float Curvature;
+            /// <summary>Absolute time parameter of the point.</summary>
+            public float Time;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="ControlPoint"/> struct.
@@ -34,12 +36,14 @@ namespace CubicPHCurve
             /// <param name="tan">Tangent vector.</param>
             /// <param name="normal">Optional normal vector.</param>
             /// <param name="curvature">Optional curvature.</param>
-            public ControlPoint(Vector3 pos, Vector3 tan, Vector3 normal = default, float curvature = 0f)
+            /// <param name="time">Absolute time parameter.</param>
+            public ControlPoint(Vector3 pos, Vector3 tan, Vector3 normal = default, float curvature = 0f, float time = 0f)
             {
                 Position = pos;
                 Tangent = tan;
                 Normal = normal;
                 Curvature = curvature;
+                Time = time;
             }
         }
 
@@ -175,6 +179,17 @@ namespace CubicPHCurve
         public Vector3 Derivative(float t) => ((((E * t + D) * t + C) * t + B) * t + A);
         /// <summary>Speed = ||r'(t)||</summary>
         public float Speed(float t) => Derivative(t).Length();
+        /// <summary>Curvature of the curve.</summary>
+        public float Curvature(float t)
+        {
+            Vector3 d1 = Derivative(t);
+            Vector3 d2 = SecondDerivative(t);
+            Vector3 cross = Vector3.Cross(d1, d2);
+            float len = d1.Length();
+            if (len < 1e-8f)
+                return 0f;
+            return cross.Length() / (len * len * len);
+        }
         /// <summary>Unit tangent T(t)</summary>
         public Vector3 Tangent(float t) => Vector3.Normalize(Derivative(t));
         /// <summary>Second derivative r''(t)</summary>
@@ -195,5 +210,17 @@ namespace CubicPHCurve
         /// <summary>Position r(t) = P0 + ∫₀ᵗ r'(u)du</summary>
         public Vector3 Position(float t) =>
             P0 + A * t + B * (t * t / 2f) + C * (t * t * t / 3f) + D * (t * t * t * t / 4f) + E * (t * t * t * t * t / 5f);
+
+        /// <summary>Velocity at absolute time T within [T0,T1].</summary>
+        public Vector3 VelocityAtTime(float T, float T0, float T1)
+        {
+            float tParam = (T - T0) / (T1 - T0);
+            Vector3 dr_dtp = Derivative(tParam);
+            float invDur = 1.0f / (T1 - T0);
+            return dr_dtp * invDur;
+        }
+
+        /// <summary>Speed at absolute time T within [T0,T1].</summary>
+        public float SpeedAtTime(float T, float T0, float T1) => VelocityAtTime(T, T0, T1).Length();
     }
 }
