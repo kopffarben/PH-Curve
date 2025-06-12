@@ -8,11 +8,19 @@ namespace CubicPHCurve
 {
     public class CubicPHCurve3DFitter
     {
+        /// <summary>
+        /// Control point used for fitting including time and normal information.
+        /// </summary>
         public struct ControlPointEx
         {
+            /// <summary>Spatial position of the point.</summary>
             public Vector3 Position;
+            /// <summary>Absolute time parameter of the point.</summary>
             public float Time;
+            /// <summary>Normal vector at the point.</summary>
             public Vector3 Normal;
+            /// <summary>Curvature at the point.</summary>
+            public float Curvature;
         }
 
         public static bool FitSingleSegmentPH3D(
@@ -42,14 +50,15 @@ namespace CubicPHCurve
             int N = cps.Length;
             Vector3[] posS = cps.Select(cp => cp.Position).ToArray();
             Vector3[] nrmS = cps.Select(cp => cp.Normal).ToArray();
+            float[] curvS = cps.Select(cp => cp.Curvature).ToArray();
 
             double Error(MathNet.Numerics.LinearAlgebra.Vector<double> vars)
             {
                 float m0 = (float)vars[0];
                 float m1 = (float)vars[1];
 
-                var cpH0 = new CubicPHCurve3D.ControlPoint(p0, u0 * m0);
-                var cpH1 = new CubicPHCurve3D.ControlPoint(p1, u1 * m1);
+                var cpH0 = new CubicPHCurve3D.ControlPoint(p0, u0 * m0, cps[0].Normal, cps[0].Curvature);
+                var cpH1 = new CubicPHCurve3D.ControlPoint(p1, u1 * m1, cps[^1].Normal, cps[^1].Curvature);
                 var seg = CubicPHCurve3D.FromControlPoints(cpH0, cpH1);
 
                 double sum = 0.0;
@@ -75,8 +84,8 @@ namespace CubicPHCurve
             float m0_fit = (float)sol[0];
             float m1_fit = (float)sol[1];
 
-            var finalCP0 = new CubicPHCurve3D.ControlPoint(p0, u0 * m0_fit);
-            var finalCP1 = new CubicPHCurve3D.ControlPoint(p1, u1 * m1_fit);
+            var finalCP0 = new CubicPHCurve3D.ControlPoint(p0, u0 * m0_fit, cps[0].Normal, cps[0].Curvature);
+            var finalCP1 = new CubicPHCurve3D.ControlPoint(p1, u1 * m1_fit, cps[^1].Normal, cps[^1].Curvature);
             fitted = CubicPHCurve3D.FromControlPoints(finalCP0, finalCP1);
 
             double sumPos2 = 0, sumNorm2 = 0;
