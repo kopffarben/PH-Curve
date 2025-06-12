@@ -116,13 +116,13 @@ namespace CubicPHCurve
             Quaternion K = Scale(q1, 2f) - Scale(q0, 2f);
             Vector3 const1 = V(K * BasisI * Quaternion.Conjugate(q1) + q1 * BasisI * Quaternion.Conjugate(K));
 
-            var b = Vector<float>.Build.Dense(new float[]
+            var b = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[]
             {
                 k0Vec.X * 0.5f, k0Vec.Y * 0.5f, k0Vec.Z * 0.5f,
                 k1Vec.X * 0.5f - const1.X, k1Vec.Y * 0.5f - const1.Y, k1Vec.Z * 0.5f - const1.Z
             });
 
-            Vector<float> x = M.Svd(true).Solve(b);
+            MathNet.Numerics.LinearAlgebra.Vector<float> x = M.Svd(true).Solve(b);
 
             Quaternion qd1 = new(x[0], x[1], x[2], x[3]);
             Quaternion qd2 = q1 - q0 - qd1;
