@@ -47,8 +47,8 @@ namespace PH_Curve.Test
             var original = CreateSampleCurve();
             Vector3 p0 = original.Position(0f);
             Vector3 p1 = original.Position(1f);
-            Vector3 t0 = original.Derivative(0f);
-            Vector3 t1 = original.Derivative(1f);
+            Vector3 t0 = original.Tangent(0f);
+            Vector3 t1 = original.Tangent(1f);
             Vector3 n0 = original.Normal(0f);
             Vector3 n1 = original.Normal(1f);
             float k0 = Curvature(t0, original.SecondDerivative(0f));
@@ -60,8 +60,8 @@ namespace PH_Curve.Test
 
             Vector3 rebuilt_p0 = rebuilt.Position(0f);
             Vector3 rebuilt_p1 = rebuilt.Position(1f);
-            Vector3 rebuilt_t0 = rebuilt.Derivative(0f);
-            Vector3 rebuilt_t1 = rebuilt.Derivative(1f);
+            Vector3 rebuilt_t0 = rebuilt.Tangent(0f);
+            Vector3 rebuilt_t1 = rebuilt.Tangent(1f);
             Vector3 rebuilt_n0 = rebuilt.Normal(0f);
             Vector3 rebuilt_n1 = rebuilt.Normal(1f);
             float rebuilt_k0 = Curvature(rebuilt_t0, original.SecondDerivative(0f));
@@ -69,8 +69,8 @@ namespace PH_Curve.Test
 
             System.Console.WriteLine($"original.Position(0f)={p0} rebuilt.Position(0f)={rebuilt_p0}");
             System.Console.WriteLine($"original.Position(1f)={p1} rebuilt.Position(1f)={rebuilt_p1}");
-            System.Console.WriteLine($"original.Derivative(0f)={t0} rebuilt.Derivative(0f)={rebuilt_t0}");
-            System.Console.WriteLine($"original.Derivative(1f)={t1} rebuilt.Derivative(1f)={rebuilt_t1}");
+            System.Console.WriteLine($"original.Tangent(0f)={t0} rebuilt.Tangent(0f)={rebuilt_t0}");
+            System.Console.WriteLine($"original.Tangent(1f)={t1} rebuilt.Tangent(1f)={rebuilt_t1}");
             System.Console.WriteLine($"original.Normal(0f)={n0} rebuilt.Normal(0f)={rebuilt_n0}");
             System.Console.WriteLine($"original.Normal(1f)={n1} rebuilt.Normal(1f)={rebuilt_n1}");
             System.Console.WriteLine($"original.Curvature(0f)={k0} rebuilt.Curvature(0f)={rebuilt_k0}");
@@ -78,8 +78,8 @@ namespace PH_Curve.Test
 
             AssertVector(p0, rebuilt_p0, 1e-5f, "Position at 0");
             AssertVector(p1, rebuilt_p1, 1e-5f, "Position at 1");
-            AssertVector(t0, rebuilt_t0, 1e-5f, "Derivative at 0");
-            AssertVector(t1, rebuilt_t1, 1e-5f, "Derivative at 1");
+            AssertVector(t0, rebuilt_t0, 1e-5f, "Tangent at 0");
+            AssertVector(t1, rebuilt_t1, 1e-5f, "Tangent at 1");
             AssertVector(n0, rebuilt_n0, 1e-5f, "Normal at 0");
             AssertVector(n1, rebuilt_n1, 1e-5f, "Normal at 1");
             Assert.AreEqual(k0, rebuilt_k0, 1e-5f, "Curvature at 0");
