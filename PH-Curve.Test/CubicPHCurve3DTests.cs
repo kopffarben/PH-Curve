@@ -58,8 +58,15 @@ namespace PH_Curve.Test
             var cp1 = new CubicPHCurve3D.ControlPoint(p1, t1, n1, k1);
             var rebuilt = CubicPHCurve3D.FromControlPoints(cp0, cp1);
 
-            AssertVector(t0, rebuilt.Derivative(0f), 1e-5f, "Derivative at 0");
-            AssertVector(t1, rebuilt.Derivative(1f), 1e-5f, "Derivative at 1");
+            Vector3 rebuilt_p0 = rebuilt.Position(0f);
+            Vector3 rebuilt_p1 = rebuilt.Position(1f);
+            Vector3 rebuilt_t0 = rebuilt.Derivative(0f);
+            Vector3 rebuilt_t1 = rebuilt.Derivative(1f);
+
+            AssertVector(t0, rebuilt_t0, 1e-5f, "Derivative at 0");
+            AssertVector(t1, rebuilt_t1, 1e-5f, "Derivative at 1");
+            AssertVector(p0, rebuilt_p0, 1e-5f, "Position at 0");
+            AssertVector(p1, rebuilt_p1, 1e-5f, "Position at 1");
         }
 
         [TestMethod]
