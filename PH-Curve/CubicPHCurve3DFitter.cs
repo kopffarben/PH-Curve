@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Numerics;
+using MathNet.Numerics.Optimization;
 
 namespace CubicPHCurve
 {
@@ -34,6 +35,9 @@ namespace CubicPHCurve
             if (cps == null || cps.Length < 2)
                 throw new ArgumentException("At least two control points are required.");
 
+            if (cps.Length == 2)
+                throw new MaximumIterationsException("Cannot fit a single segment from only two samples.");
+
             float[] absTimes = cps.Select(cp => cp.Time).ToArray();
             float t0 = absTimes.Min();
             float t1 = absTimes.Max();
@@ -48,8 +52,17 @@ namespace CubicPHCurve
 
             var start = cps.First();
             var end = cps[^1];
-            var cpH0 = new CubicPHCurve3D.ControlPoint(start.Position, start.Tangent, start.Normal, start.Curvature);
-            var cpH1 = new CubicPHCurve3D.ControlPoint(end.Position, end.Tangent, end.Normal, end.Curvature);
+
+            Vector3 startTan = start.Tangent;
+            if (startTan == Vector3.Zero)
+                startTan = (posS[1] - posS[0]) / (absTimes[1] - absTimes[0]);
+
+            Vector3 endTan = end.Tangent;
+            if (endTan == Vector3.Zero)
+                endTan = (posS[N - 1] - posS[N - 2]) / (absTimes[N - 1] - absTimes[N - 2]);
+
+            var cpH0 = new CubicPHCurve3D.ControlPoint(start.Position, startTan, start.Normal, start.Curvature);
+            var cpH1 = new CubicPHCurve3D.ControlPoint(end.Position, endTan, end.Normal, end.Curvature);
             fitted = CubicPHCurve3D.FromControlPoints(cpH0, cpH1);
 
             double sumPos2 = 0, sumNorm2 = 0;
