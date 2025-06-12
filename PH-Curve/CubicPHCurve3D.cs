@@ -56,10 +56,14 @@ namespace CubicPHCurve
             Vector3 T = Vector3.Normalize(tangent);
             Vector3 N = Vector3.Normalize(normal);
             Vector3 B = Vector3.Normalize(Vector3.Cross(T, N));
+            // Matrix4x4 expects basis vectors as **columns**. Construct the
+            // rotation matrix so that its columns form the orthonormal frame
+            // (T, N, B) rather than treating them as rows which would yield the
+            // transpose and thus an incorrect orientation.
             var rot = new Matrix4x4(
-                T.X, T.Y, T.Z, 0f,
-                N.X, N.Y, N.Z, 0f,
-                B.X, B.Y, B.Z, 0f,
+                T.X, N.X, B.X, 0f,
+                T.Y, N.Y, B.Y, 0f,
+                T.Z, N.Z, B.Z, 0f,
                 0f, 0f, 0f, 1f);
             return Quaternion.CreateFromRotationMatrix(rot);
         }
@@ -108,7 +112,11 @@ namespace CubicPHCurve
             {
                 Quaternion e = basis[j];
                 Vector3 col0 = V(e * BasisI * Quaternion.Conjugate(q0) + q0 * BasisI * Quaternion.Conjugate(e));
-                Vector3 col1 = V(-e * BasisI * Quaternion.Conjugate(q1) - q1 * BasisI * Quaternion.Conjugate(e));
+                // Use the same sign convention for both end points. The
+                // previous version used a negated expression which produced
+                // an incorrect linear system and thus wrong quaternion
+                // coefficients.
+                Vector3 col1 = V(e * BasisI * Quaternion.Conjugate(q1) + q1 * BasisI * Quaternion.Conjugate(e));
                 M[0, j] = col0.X; M[1, j] = col0.Y; M[2, j] = col0.Z;
                 M[3, j] = col1.X; M[4, j] = col1.Y; M[5, j] = col1.Z;
             }
@@ -132,7 +140,9 @@ namespace CubicPHCurve
 
             Vector3 targetDiff = cp1.Position - cp0.Position;
 
-            for (int iter = 0; iter < 5; ++iter)
+            // Use a few more iterations to ensure the nonlinear system
+            // converges in typical cases.
+            for (int iter = 0; iter < 20; ++iter)
             {
                 var co = DerivativeCoefficientsFromQuaternions(q0, qd1, qd2);
                 Vector3 diff = Integration(co.A, co.B, co.C, co.D, co.E);
@@ -235,7 +245,9 @@ namespace CubicPHCurve
             {
                 Quaternion e = basis[j];
                 Vector3 col0 = V(e*BasisI*Quaternion.Conjugate(q0) + q0*BasisI*Quaternion.Conjugate(e));
-                Vector3 col1 = V(-e*BasisI*Quaternion.Conjugate(q1) - q1*BasisI*Quaternion.Conjugate(e));
+                // Same fix for the helper method used during coefficient
+                // computation.
+                Vector3 col1 = V(e*BasisI*Quaternion.Conjugate(q1) + q1*BasisI*Quaternion.Conjugate(e));
                 M[0,j] = col0.X; M[1,j]=col0.Y; M[2,j]=col0.Z;
                 M[3,j] = col1.X; M[4,j]=col1.Y; M[5,j]=col1.Z;
             }
