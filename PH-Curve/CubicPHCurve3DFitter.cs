@@ -35,9 +35,6 @@ namespace CubicPHCurve
             if (cps == null || cps.Length < 2)
                 throw new ArgumentException("At least two control points are required.");
 
-            if (cps.Length == 2)
-                throw new MaximumIterationsException("Cannot fit a single segment from only two samples.");
-
             float[] absTimes = cps.Select(cp => cp.Time).ToArray();
             float t0 = absTimes.Min();
             float t1 = absTimes.Max();
