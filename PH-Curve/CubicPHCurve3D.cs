@@ -127,6 +127,60 @@ namespace CubicPHCurve
             Quaternion qd1 = new(x[0], x[1], x[2], x[3]);
             Quaternion qd2 = q1 - q0 - qd1;
 
+            static Vector3 Integration(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Vector3 E)
+                => A + B * 0.5f + C * (1f / 3f) + D * 0.25f + E * 0.2f;
+
+            Vector3 targetDiff = cp1.Position - cp0.Position;
+
+            for (int iter = 0; iter < 5; ++iter)
+            {
+                var co = DerivativeCoefficientsFromQuaternions(q0, qd1, qd2);
+                Vector3 diff = Integration(co.A, co.B, co.C, co.D, co.E);
+
+                var residual = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(9);
+                // curvature/normal residuals
+                var current = M * MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[] { qd1.X, qd1.Y, qd1.Z, qd1.W });
+                residual.SetSubVector(0, 6, current - b);
+                // position residual
+                residual[6] = diff.X - targetDiff.X;
+                residual[7] = diff.Y - targetDiff.Y;
+                residual[8] = diff.Z - targetDiff.Z;
+
+                if (residual.L2Norm() < 1e-6f)
+                    break;
+
+                // numerical Jacobian 9x4
+                var J = Matrix<float>.Build.Dense(9, 4);
+                float eps = 1e-4f;
+                for (int j = 0; j < 4; ++j)
+                {
+                    Quaternion delta = j switch
+                    {
+                        0 => new Quaternion(eps, 0f, 0f, 0f),
+                        1 => new Quaternion(0f, eps, 0f, 0f),
+                        2 => new Quaternion(0f, 0f, eps, 0f),
+                        _ => new Quaternion(0f, 0f, 0f, eps)
+                    };
+                    Quaternion qd1Pert = qd1 + delta;
+                    Quaternion qd2Pert = q1 - q0 - qd1Pert;
+                    var c = DerivativeCoefficientsFromQuaternions(q0, qd1Pert, qd2Pert);
+                    Vector3 d = Integration(c.A, c.B, c.C, c.D, c.E);
+                    var cur = M * MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[] { qd1Pert.X, qd1Pert.Y, qd1Pert.Z, qd1Pert.W });
+                    J[0, j] = (cur[0] - current[0]) / eps;
+                    J[1, j] = (cur[1] - current[1]) / eps;
+                    J[2, j] = (cur[2] - current[2]) / eps;
+                    J[3, j] = (cur[3] - current[3]) / eps;
+                    J[4, j] = (cur[4] - current[4]) / eps;
+                    J[5, j] = (cur[5] - current[5]) / eps;
+                    Vector3 g = (d - diff) / eps;
+                    J[6, j] = g.X; J[7, j] = g.Y; J[8, j] = g.Z;
+                }
+
+                var deltaX = J.Svd(true).Solve(-residual);
+                qd1 += new Quaternion(deltaX[0], deltaX[1], deltaX[2], deltaX[3]);
+                qd2 = q1 - q0 - qd1;
+            }
+
             var coeffs = DerivativeCoefficientsFromQuaternions(q0, qd1, qd2);
             return new CubicPHCurve3D(coeffs.A, coeffs.B, coeffs.C, coeffs.D, coeffs.E, cp0.Position);
         }
