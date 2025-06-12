@@ -1,7 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Numerics;
 using CubicPHCurve;
-using MathNet.Numerics.Optimization;
 
 namespace PH_Curve.Test
 {
@@ -13,9 +12,30 @@ namespace PH_Curve.Test
         {
             var cps = new[]
             {
-                new CubicPHCurve3DFitter.ControlPointEx{Position=new Vector3(0,0,0), Time=0f, Normal=Vector3.UnitZ, Curvature=0f},
-                new CubicPHCurve3DFitter.ControlPointEx{Position=new Vector3(1,1,0), Time=0.5f, Normal=Vector3.UnitZ, Curvature=0f},
-                new CubicPHCurve3DFitter.ControlPointEx{Position=new Vector3(2,0,0), Time=1f, Normal=Vector3.UnitZ, Curvature=0f}
+                new CubicPHCurve3DFitter.ControlPointEx
+                {
+                    Position = new Vector3(0,0,0),
+                    Tangent = new Vector3(2,2,0),
+                    Time = 0f,
+                    Normal = Vector3.UnitZ,
+                    Curvature = 0f
+                },
+                new CubicPHCurve3DFitter.ControlPointEx
+                {
+                    Position = new Vector3(1,1,0),
+                    Tangent = new Vector3(0,0,0),
+                    Time = 0.5f,
+                    Normal = Vector3.UnitZ,
+                    Curvature = 0f
+                },
+                new CubicPHCurve3DFitter.ControlPointEx
+                {
+                    Position = new Vector3(2,0,0),
+                    Tangent = new Vector3(2,-2,0),
+                    Time = 1f,
+                    Normal = Vector3.UnitZ,
+                    Curvature = 0f
+                }
             };
 
             bool ok = CubicPHCurve3DFitter.FitSingleSegmentPH3D(cps, out var curve, out var posErr, out var normErr, out var T0, out var T1);
@@ -103,6 +123,7 @@ namespace PH_Curve.Test
                 cps[i] = new CubicPHCurve3DFitter.ControlPointEx
                 {
                     Position = curve.Position(t),
+                    Tangent = d1,
                     Time = t,
                     Normal = curve.Normal(t),
                     Curvature = Curvature(d1, d2)
@@ -118,13 +139,6 @@ namespace PH_Curve.Test
             foreach (int count in counts)
             {
                 var cps = SampleCurve(count);
-
-                if (count == 2)
-                {
-                    Assert.ThrowsException<MaximumIterationsException>(() =>
-                        CubicPHCurve3DFitter.FitSingleSegmentPH3D(cps, out _, out _, out _, out _, out _));
-                    continue;
-                }
 
                 bool ok = CubicPHCurve3DFitter.FitSingleSegmentPH3D(cps,
                     out var curve, out var posErr, out var normErr, out var T0, out var T1);
