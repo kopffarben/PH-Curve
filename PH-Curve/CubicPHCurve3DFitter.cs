@@ -1,8 +1,6 @@
 using System;
 using System.Linq;
 using System.Numerics;
-using MathNet.Numerics;
-using MathNet.Numerics.LinearAlgebra;
 
 namespace CubicPHCurve
 {
@@ -15,6 +13,8 @@ namespace CubicPHCurve
         {
             /// <summary>Spatial position of the point.</summary>
             public Vector3 Position;
+            /// <summary>Tangent vector at the point.</summary>
+            public Vector3 Tangent;
             /// <summary>Absolute time parameter of the point.</summary>
             public float Time;
             /// <summary>Normal vector at the point.</summary>
@@ -42,51 +42,15 @@ namespace CubicPHCurve
             float duration = t1 - t0;
             float[] times = absTimes.Select(t => (t - t0) / duration).ToArray();
 
-            Vector3 p0 = cps.First().Position;
-            Vector3 p1 = cps.Last().Position;
-            Vector3 u0 = Vector3.Normalize(cps[1].Position - cps[0].Position);
-            Vector3 u1 = Vector3.Normalize(cps[^1].Position - cps[^2].Position);
-
             int N = cps.Length;
             Vector3[] posS = cps.Select(cp => cp.Position).ToArray();
             Vector3[] nrmS = cps.Select(cp => cp.Normal).ToArray();
-            float[] curvS = cps.Select(cp => cp.Curvature).ToArray();
 
-            double Error(MathNet.Numerics.LinearAlgebra.Vector<double> vars)
-            {
-                float m0 = (float)vars[0];
-                float m1 = (float)vars[1];
-
-                var cpH0 = new CubicPHCurve3D.ControlPoint(p0, u0 * m0, cps[0].Normal, cps[0].Curvature);
-                var cpH1 = new CubicPHCurve3D.ControlPoint(p1, u1 * m1, cps[^1].Normal, cps[^1].Curvature);
-                var seg = CubicPHCurve3D.FromControlPoints(cpH0, cpH1);
-
-                double sum = 0.0;
-                for (int i = 0; i < N; ++i)
-                {
-                    Vector3 dp = seg.Position(times[i]) - posS[i];
-                    sum += dp.LengthSquared();
-
-                    Vector3 d1 = seg.Derivative(times[i]);
-                    Vector3 T = Vector3.Normalize(d1);
-                    Vector3 d2 = seg.SecondDerivative(times[i]);
-                    Vector3 Nf = Vector3.Normalize(d2 - Vector3.Dot(d2, T) * T);
-                    Vector3 dn = Nf - nrmS[i];
-                    sum += dn.LengthSquared();
-                }
-                return sum;
-            }
-
-            double dist = Vector3.Distance(p0, p1);
-            var initialGuess = MathNet.Numerics.LinearAlgebra.Vector<double>.Build.DenseOfArray(new[] { dist, dist });
-            MathNet.Numerics.LinearAlgebra.Vector<double> sol = FindMinimum.OfFunction(Error, initialGuess, 1e-6, 1000);
-
-            float m0_fit = (float)sol[0];
-            float m1_fit = (float)sol[1];
-
-            var finalCP0 = new CubicPHCurve3D.ControlPoint(p0, u0 * m0_fit, cps[0].Normal, cps[0].Curvature);
-            var finalCP1 = new CubicPHCurve3D.ControlPoint(p1, u1 * m1_fit, cps[^1].Normal, cps[^1].Curvature);
-            fitted = CubicPHCurve3D.FromControlPoints(finalCP0, finalCP1);
+            var start = cps.First();
+            var end = cps[^1];
+            var cpH0 = new CubicPHCurve3D.ControlPoint(start.Position, start.Tangent, start.Normal, start.Curvature);
+            var cpH1 = new CubicPHCurve3D.ControlPoint(end.Position, end.Tangent, end.Normal, end.Curvature);
+            fitted = CubicPHCurve3D.FromControlPoints(cpH0, cpH1);
 
             double sumPos2 = 0, sumNorm2 = 0;
             for (int i = 0; i < N; ++i)
