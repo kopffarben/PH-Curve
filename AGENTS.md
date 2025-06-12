@@ -102,6 +102,38 @@ To exit the F# console, type:
 #quit;;
 ```
 
+## Using dotnet-script
+
+`dotnet-script` allows you to write and execute C# scripts (.csx files) directly from the command line.
+
+### Installing dotnet-script (if not already installed):
+
+```bash
+dotnet tool install -g dotnet-script
+```
+
+Make sure your path includes the .NET tools directory:
+
+```bash
+export PATH="$PATH:$HOME/.dotnet/tools"
+```
+
+### Creating and Running a Script:
+
+Create a new file, e.g. `hello.csx`, with the following content:
+
+```csharp
+Console.WriteLine("Hello from dotnet-script!");
+```
+
+Run it using:
+
+```bash
+dotnet script hello.csx
+```
+
+You can also import packages and use top-level code, making it perfect for quick testing or automation scripts.
+
 ## Running Tests
 
 Use the following command to run tests:
@@ -112,5 +144,5 @@ dotnet test
 
 This automatically executes all available unit tests in your project.
 
-You are now well-equipped to efficiently tackle algebraic problems using .NET and particularly F#.
+You are now well-equipped to efficiently tackle algebraic problems using .NET, particularly F#, and leverage C# scripting with dotnet-script.
 
