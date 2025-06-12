@@ -5,7 +5,7 @@ using CubicPHCurve;
 namespace PH_Curve.Test
 {
     [TestClass]
-    public sealed class Test1
+    public sealed class CubicPHCurve3DFitterTests
     {
         [TestMethod]
         public void FitSegmentProducesSmallErrors()
