@@ -50,6 +50,7 @@ namespace PH_Curve.Test
             return cross.Length() / (len * len * len);
         }
 
+
         [TestMethod]
         public void FitSegmentMatchesGivenTangents()
         {
