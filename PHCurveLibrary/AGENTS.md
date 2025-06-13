@@ -133,10 +133,13 @@ The library is organised into separate source files:
   [PDF (arXiv)](https://arxiv.org/pdf/1401.1234.pdf)
 
 - **Farouki et al. (2008), _Spatial PH Quintic Formoptimierung_**  
-  [PDF (arXiv)](https://arxiv.org/pdf/0803.5678.pdf)
+  [PDF (arXiv)](https://www.academia.edu/16097877/Identification_of_spatial_PH_quintic_Hermite_interpolants_with_near-optimal_shape_measures)
 
 - **Walton & Meek (1996), _Clothoid Approximation_**  
   [PDF (ResearchGate)](https://www.researchgate.net/profile/Dereck_Meek/publication/222850474_G2_curve_design_with_a_pair_of_Pythagorean_Hodograph_quintic_spiral_segments/links/0fcfd50bb539c74254000000/G2-curve-design-with-a-pair-of-Pythagorean-Hodograph-quintic-spiral-segments.pdf)
 
 - **Farouki & Saguin-Sprynski (2014), C2_interpolation_of_spatial_data_subject_to_arc-le**  
   [PDF (ResearchGate)](https://www.researchgate.net/profile/Nathalie-Saguin-Sprynski/publication/259161443_C2_interpolation_of_spatial_data_subject_to_arc-length_constraints_using_Pythagorean-hodograph_quintic_splines/links/5f0c38e3299bf1074452d3aa/C2-interpolation-of-spatial-data-subject-to-arc-length-constraints-using-Pythagorean-hodograph-quintic-splines.pdf?_tp=eyJjb250ZXh0Ijp7ImZpcnN0UGFnZSI6InB1YmxpY2F0aW9uIiwicGFnZSI6InB1YmxpY2F0aW9uIiwicHJldmlvdXNQYWdlIjoiX2RpcmVjdCJ9fQ)
+
+- **Farouki et al. (2008), _Identification of Spatial PH Quintic Hermite Interpolants with Near-Optimal Shape Measures_**  
+  [Download PDF (ResearchGate / Academia.edu)](https://www.academia.edu/16097877/Identification_of_spatial_PH_quintic_Hermite_interpolants_with_near-optimal_shape_measures)
