@@ -52,6 +52,10 @@ namespace PHCurveLibrary.Tests
             planner.AddSegment(p1, p2);
             var path = planner.BuildPath();
 
+            Console.WriteLine(
+                "BuildPath_ReturnsAllSegments: Created {0} segments.",
+                path.Count);
+
             // Two segments are expected because AddSegment was called twice.
             Assert.AreEqual(2, path.Count);
         }
@@ -69,7 +73,9 @@ namespace PHCurveLibrary.Tests
             planner.AddSegment(p1, p2);
 
             // ValidatePathG2 internally calls PHCurveFactory.ValidateG2 following Jaklič et al. (2015).
-            Assert.IsTrue(planner.ValidatePathG2());
+            bool result = planner.ValidatePathG2();
+            Console.WriteLine("ValidatePathG2_ReturnsTrueForContinuousPath: result={0}", result);
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
@@ -86,7 +92,11 @@ namespace PHCurveLibrary.Tests
             planner.AddSegment(start, junctionEnd);
             planner.AddSegment(junctionStart, end);
 
-            Assert.IsFalse(planner.ValidatePathG2());
+            bool result = planner.ValidatePathG2();
+            Console.WriteLine(
+                "ValidatePathG2_ReturnsFalseForDiscontinuousPath: result={0}",
+                result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -109,6 +119,9 @@ namespace PHCurveLibrary.Tests
             }
 
             var path = planner.BuildPath();
+            Console.WriteLine(
+                "BuildPath_WithStraightLinePoints: path contains {0} segments.",
+                path.Count);
             // The number of generated segments must equal the number of points minus one.
             Assert.AreEqual(points.Length - 1, path.Count);
         }
@@ -133,6 +146,9 @@ namespace PHCurveLibrary.Tests
             }
 
             var path = planner.BuildPath();
+            Console.WriteLine(
+                "BuildPath_WithSemicirclePoints: path count {0}.",
+                path.Count);
             Assert.AreEqual(points.Length - 1, path.Count);
         }
 
@@ -157,6 +173,9 @@ namespace PHCurveLibrary.Tests
             }
 
             var path = planner.BuildPath();
+            Console.WriteLine(
+                "BuildPath_WithSinePoints: generated {0} segments.",
+                path.Count);
             Assert.AreEqual(points.Length - 1, path.Count);
         }
 
@@ -174,6 +193,9 @@ namespace PHCurveLibrary.Tests
             planner.AddSegment(start, end);
             var path = planner.BuildPath();
             Assert.AreEqual(1, path.Count);
+
+            Console.WriteLine(
+                "BuildPath_PreservesCurvatureAndPrincipalNormals: verifying single segment.");
 
             var seg = path[0];
             // Compare curvature at the segment ends. The tolerance is based on
@@ -203,7 +225,11 @@ namespace PHCurveLibrary.Tests
 
             // The G^2 check must fail because the normals at the joint do not
             // match.
-            Assert.IsFalse(planner.ValidatePathG2());
+            bool result = planner.ValidatePathG2();
+            Console.WriteLine(
+                "ValidatePathG2_FailsWhenNormalsDiffer: result={0}",
+                result);
+            Assert.IsFalse(result);
         }
     }
 }
