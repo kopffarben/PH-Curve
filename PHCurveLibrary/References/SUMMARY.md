@@ -24,7 +24,7 @@ The paper titled **Global well-posedness of strong solutions to the 3D primitive
 **Spatial motion planning with Pythagorean Hodograph curves** ([Local PDF](Arrizabalaga_Ryll_2022_Spatial_Motion_Planning_with_PH_Curves.pdf)) proposes a two-stage scheme that embeds obstacle geometry into a PH spline and then searches a collision-free path. The compact PH representation is well-suited for optimisation.
 
 ## 8. Arrizabalaga et al. (2024)
-**PHODCOS: Pythagorean Hodograph-based Differentiable Coordinate System** ([Local PDF](Arrizabalaga_et_al_2024_PHODCOS.pdf)) introduces a differentiable moving frame defined via PH curves, providing exact derivatives for advanced robotic guidance.
+**PHODCOS: Pythagorean Hodograph-based Differentiable Coordinate System** ([Local PDF](Arrizabalaga_et_al_2024_PHODCOS.pdf)) ([source](https://github.com/jonarriza96/phodcos))  introduces a differentiable moving frame defined via PH curves, providing exact derivatives for advanced robotic guidance.
 
 ## Relation to the Implementation
 The `PHCurveLibrary` project mirrors many concepts from the literature:
