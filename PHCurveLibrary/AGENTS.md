@@ -119,32 +119,43 @@ The library is organised into separate source files:
 ---
 
 ## Additional References
+For a summary of these papers, see [SUMMARY.md](../References/SUMMARY.md).
 
-- **Farouki & Dong (2012), _PHquintic Bibliothek_**
+- **Farouki & Dong (2012), _PHquintic Library_**
   [PDF (UC Davis eScholarship)](https://escholarship.org/content/qt1jk437p5/qt1jk437p5_noSplash_4531c0e73cf4cf42e7af65473e741413.pdf)
-  [Local PDF](../References/arouki%20%26%20Dong%20%282012%29%2C%20PHquintic%20Bibliothek.pdf)
+  [Local PDF](../References/Farouki_Dong_2012_PHquintic_Library.pdf)
 
 - **Jaklič et al. (2015), _G² Quintic PH-Interpolation_**
   [Preprint (University of Primorska)](https://osebje.famnit.upr.si/~vito.vitrih/papers/G2PHDeg5_NM_TMA_revision.pdf)
-  [Local PDF](../References/Jakli%C4%8D%20et%20al.%20%282015%29%2C%20G%C2%B2%20Quintic%20PH-Interpolation.pdf)
+  [Local PDF](../References/Jaklic_et_al_2015_G2_Quintic_PH_Interpolation.pdf)
 
 - **Meek & Walton (2007), _G² PH-Quintic Spirale_**
   [PDF (ResearchGate)](https://www.researchgate.net/profile/Dereck_Meek/publication/222850474_G2_curve_design_with_a_pair_of_Pythagorean_Hodograph_quintic_spiral_segments/links/0fcfd50bb539c74254000000/G2-curve-design-with-a-pair-of-Pythagorean-Hodograph-quintic-spiral-segments.pdf)
 
-- **Kozak (2014), _Spatial Rational PH Kubik_**
+- **Kozak (2014), _Spatial Rational PH Cubic_**
   [PDF (arXiv)](https://arxiv.org/pdf/1401.1234.pdf)
-  [Local PDF](../References/Kozak%20%282014%29%2C%20Spatial%20Rational%20PH%20Kubik.pdf)
+  [Local PDF](../References/Kozak_2014_Spatial_Rational_PH_Cubic.pdf)
 
-- **Farouki et al. (2008), _Spatial PH Quintic Formoptimierung_**
+- **Farouki et al. (2008), _Spatial PH Quintic Optimisation_**
   [PDF (arXiv)](https://www.academia.edu/16097877/Identification_of_spatial_PH_quintic_Hermite_interpolants_with_near-optimal_shape_measures)
-  [Local PDF](../References/Identification_of_spatial_PH_quintic_Her.pdf)
+  [Local PDF](../References/Farouki_et_al_2008_Identification_of_Spatial_PH_Quintic_Hermite_Interpolants.pdf)
 
 - **Walton & Meek (1996), _Clothoid Approximation_**
   [PDF (ResearchGate)](https://www.researchgate.net/profile/Dereck_Meek/publication/222850474_G2_curve_design_with_a_pair_of_Pythagorean_Hodograph_quintic_spiral_segments/links/0fcfd50bb539c74254000000/G2-curve-design-with-a-pair-of-Pythagorean-Hodograph-quintic-spiral-segments.pdf)
 
-- **Farouki & Saguin-Sprynski (2014), C2_interpolation_of_spatial_data_subject_to_arc-le**
+- **Farouki & Saguin-Sprynski (2014), C2 interpolation of spatial data subject to arc-length constraints**
   [PDF (ResearchGate)](https://www.researchgate.net/profile/Nathalie-Saguin-Sprynski/publication/259161443_C2_interpolation_of_spatial_data_subject_to_arc-length_constraints_using_Pythagorean-hodograph_quintic_splines/links/5f0c38e3299bf1074452d3aa/C2-interpolation-of-spatial-data-subject-to-arc-length-constraints-using-Pythagorean-hodograph-quintic-splines.pdf?_tp=eyJjb250ZXh0Ijp7ImZpcnN0UGFnZSI6InB1YmxpY2F0aW9uIiwicGFnZSI6InB1YmxpY2F0aW9uIiwicHJldmlvdXNQYWdlIjoiX2RpcmVjdCJ9fQ)
-  [Local PDF](../References/Farouki%20%26%20Saguin-Sprynski%20%282014%29%20C2_interpolation_of_spatial_data_subject_to_arc-le.pdf)
+  [Local PDF](../References/Farouki_Saguin_Sprynski_2014_C2_Interpolation.pdf)
 
 - **Farouki et al. (2008), _Identification of Spatial PH Quintic Hermite Interpolants with Near-Optimal Shape Measures_**
   [Download PDF (ResearchGate / Academia.edu)](https://www.academia.edu/16097877/Identification_of_spatial_PH_quintic_Hermite_interpolants_with_near-optimal_shape_measures)
+  [Local PDF](../References/Farouki_et_al_2008_Identification_of_Spatial_PH_Quintic_Hermite_Interpolants.pdf)
+- **Schröcker & Šír (2023), _Optimal interpolation with spatial rational PH curves_**
+  [PDF (arXiv)](https://arxiv.org/pdf/2302.04632.pdf)
+  [Local PDF](../References/Schroecker_Sir_2023_Optimal_Interpolation_with_Spatial_Rational_PH_Curves.pdf)
+- **Arrizabalaga & Ryll (2022), _Spatial motion planning with Pythagorean Hodograph curves_**
+  [PDF (arXiv)](https://arxiv.org/pdf/2209.01673.pdf)
+  [Local PDF](../References/Arrizabalaga_Ryll_2022_Spatial_Motion_Planning_with_PH_Curves.pdf)
+- **Arrizabalaga et al. (2024), _PHODCOS: Pythagorean Hodograph-based Differentiable Coordinate System_**
+  [PDF (arXiv)](https://arxiv.org/pdf/2410.07750.pdf)
+  [Local PDF](../References/Arrizabalaga_et_al_2024_PHODCOS.pdf)
