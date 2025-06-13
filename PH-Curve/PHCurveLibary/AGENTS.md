@@ -1,6 +1,14 @@
 # AGENTS.md
 
 This document outlines the agent-based architecture of the **PHCurveLibrary** for Pythagorean-Hodograph (PH) curves with G² interpolation. It describes each component (“agent”) and the core data structures, along with the underlying mathematics and key literature references.
+## File Layout
+
+The library is organised into separate source files:
+
+- `HermiteControlPoint3D.cs` defines the Hermite endpoint data structure.
+- `PHCurve3D.cs` implements the PH curve representation.
+- `PHCurveFactory.cs` provides construction and validation helpers.
+
 
 ---
 
