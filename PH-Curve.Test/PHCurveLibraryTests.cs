@@ -8,6 +8,11 @@ namespace PHCurveLibrary.Tests
 {
     /// <summary>
     /// Unit tests for <see cref="PHCurveLibrary"/> and <see cref="PHCurveFactory"/> functionality.
+    /// In particular these tests demonstrate how the struct <see cref="HermiteControlPoint3D"/>
+    /// collects all Hermite data (position, tangent, curvature and principal normal) in a single
+    /// value type.  This design simplifies the construction of PH segments where both endpoints
+    /// share the same data layout and therefore allows a direct call to
+    /// <see cref="PHCurveFactory.CreateQuintic(HermiteControlPoint3D, HermiteControlPoint3D)"/>.
     /// </summary>
     [TestClass]
     public class PHCurveLibraryTests
@@ -81,6 +86,55 @@ namespace PHCurveLibrary.Tests
             var c1 = PHCurveFactory.CreateQuintic(a, b);
             var c2 = PHCurveFactory.CreateQuintic(b, c);
             Assert.IsTrue(PHCurveFactory.ValidateG2(c1, c2));
+        }
+
+        /// <summary>
+        /// TangentUnit should always equal the normalised derivative.
+        /// </summary>
+        [TestMethod]
+        public void TangentUnit_EqualsNormalizedDerivative()
+        {
+            var p = new HermiteControlPoint3D(new Vector3(0, 0, 0), new Vector3(1, 0.5f, 0), 0.2f, new Vector3(0, 0, 1));
+            var c = PHCurveFactory.CreateQuintic(p, p);
+            for (int i = 0; i <= 10; i++)
+            {
+                float t = i / 10f;
+                var expected = Vector3.Normalize(c.Derivative(t));
+                var actual = c.TangentUnit(t);
+                Assert.IsTrue(Vector3.Distance(expected, actual) < 1e-5f);
+            }
+        }
+
+        /// <summary>
+        /// PrincipalNormal must be a unit vector and perpendicular to the derivative.
+        /// </summary>
+        [TestMethod]
+        public void PrincipalNormal_IsUnitAndOrthogonal()
+        {
+            var p = new HermiteControlPoint3D(new Vector3(0, 0, 0), new Vector3(1, 1, 0), 0.5f, Vector3.UnitZ);
+            var c = PHCurveFactory.CreateQuintic(p, p);
+            for (int i = 1; i < 10; i++)
+            {
+                float t = i / 10f;
+                var d = c.Derivative(t);
+                var n = c.PrincipalNormal(t);
+                Assert.IsTrue(Math.Abs(Vector3.Dot(d, n)) < 1e-5f);
+                Assert.IsTrue(Math.Abs(n.Length() - 1f) < 1e-5f);
+            }
+        }
+
+        /// <summary>
+        /// Validation should fail when the principal normals do not match even if positions and tangents do.
+        /// </summary>
+        [TestMethod]
+        public void ValidateG2_FailsWhenNormalsDiffer()
+        {
+            var a = new HermiteControlPoint3D(Vector3.Zero, Vector3.UnitX, 0, Vector3.UnitY);
+            var b1 = new HermiteControlPoint3D(Vector3.One, Vector3.UnitX, 0, Vector3.UnitY);
+            var b2 = new HermiteControlPoint3D(Vector3.One, Vector3.UnitX, 0, Vector3.UnitZ);
+            var c1 = PHCurveFactory.CreateQuintic(a, b1);
+            var c2 = PHCurveFactory.CreateQuintic(a, b2);
+            Assert.IsFalse(PHCurveFactory.ValidateG2(c1, c2));
         }
     }
 }
