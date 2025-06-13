@@ -74,6 +74,99 @@ namespace PHCurveLibrary
         public float Speed(float t) => Derivative(t).Length();
 
         /// <summary>
+        /// Exact arc-length of the PH segment from <c>0</c> to <paramref name="t"/>.
+        /// </summary>
+        /// <remarks>
+        /// For a genuine Pythagorean hodograph the speed is a polynomial
+        /// &sigma;(t) whose square equals &lVert;r'(t)&rVert;<sup>2</sup>.
+        /// This method recovers the polynomial coefficients by taking the
+        /// square root of the hodograph norm and integrates them analytically.
+        /// If the coefficients do not describe a PH curve, a numerical
+        /// Simpson integration is used as fallback.
+        /// </remarks>
+        /// <param name="t">Normalized parameter in [0,1].</param>
+        /// <returns>The arc-length from 0 to <paramref name="t"/>.</returns>
+        public float ArcLength(float t)
+        {
+            if (TrySpeedPolynomial(out float s0, out float s1, out float s2, out float s3, out float s4))
+            {
+                float t2 = t * t;
+                float t3 = t2 * t;
+                float t4 = t3 * t;
+                float t5 = t4 * t;
+                return s0 * t
+                     + 0.5f * s1 * t2
+                     + (s2 / 3f) * t3
+                     + (s3 / 4f) * t4
+                     + (s4 / 5f) * t5;
+            }
+
+            // Numerical fallback using Simpson's rule
+            int steps = 100;
+            float h = t / steps;
+            float sum = Speed(0f) + Speed(t);
+            for (int i = 1; i < steps; i += 2)
+            {
+                float u = i * h;
+                sum += 4f * Speed(u);
+            }
+
+            for (int i = 2; i < steps; i += 2)
+            {
+                float u = i * h;
+                sum += 2f * Speed(u);
+            }
+
+            return sum * h / 3f;
+        }
+
+        private bool TrySpeedPolynomial(out float s0, out float s1, out float s2, out float s3, out float s4)
+        {
+            Vector3[] v = new[] { A, B, C, D, E };
+            Span<float> m = stackalloc float[9];
+            for (int i = 0; i < 5; ++i)
+            {
+                for (int j = 0; j < 5; ++j)
+                {
+                    m[i + j] += Vector3.Dot(v[i], v[j]);
+                }
+            }
+
+            s0 = MathF.Sqrt(m[0]);
+            if (s0 < 1e-8f)
+            {
+                s1 = s2 = s3 = s4 = 0f;
+                return false;
+            }
+
+            s1 = m[1] / (2f * s0);
+            s2 = (m[2] - s1 * s1) / (2f * s0);
+            s3 = (m[3] - 2f * s1 * s2) / (2f * s0);
+            s4 = (m[4] - 2f * s1 * s3 - s2 * s2) / (2f * s0);
+
+            Span<float> check = stackalloc float[9];
+            float[] s = { s0, s1, s2, s3, s4 };
+            for (int i = 0; i < 5; ++i)
+            {
+                for (int j = 0; j < 5; ++j)
+                {
+                    check[i + j] += s[i] * s[j];
+                }
+            }
+
+            for (int k = 0; k < 9; ++k)
+            {
+                if (MathF.Abs(check[k] - m[k]) > 1e-3f)
+                {
+                    s0 = s1 = s2 = s3 = s4 = 0f;
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Unit tangent vector T(t) = r'(t) / |r'(t)|.
         /// </summary>
         public Vector3 TangentUnit(float t) => Vector3.Normalize(Derivative(t));
