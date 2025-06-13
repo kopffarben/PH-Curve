@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>PH_Curve.Test</RootNamespace>
+    <RootNamespace>PHCurveLibrary.Test</RootNamespace>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="MSTest" Version="3.6.4" />
-    <ProjectReference Include="..\PH-Curve\PH-Curve.csproj" />
+    <ProjectReference Include="..\PHCurveLibrary\PHCurveLibrary.csproj" />
   </ItemGroup>
 
   <ItemGroup>
