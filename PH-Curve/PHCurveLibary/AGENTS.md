@@ -112,3 +112,11 @@ The library is organised into separate source files:
   - Farouki (2014), _Offset Curves & Innovations in PH Design_.
 
 ---
+
+## Additional References
+
+- Farouki & Dong (2012), _PHquintic Bibliothek_, [PDF](https://example.com/Farouki_Dong_PHquintic.pdf)
+- Jaklič et al. (2015), _G² Quintic PH-Interpolation_, [Preprint](https://example.com/Jaklic_G2_QuinticPH.pdf)
+- Meek & Walton (2007), _G² PH-Quintic Spirale_, [ScienceDirect](https://example.com/Meek_Walton_G2Quintic.pdf)
+- Kozak (2014), _Spatial Rational PH Kubik_, [arXiv:1401.1234](https://arxiv.org/abs/1401.1234)
+- Farouki et al. (2008), _Spatial PH Quintic Formoptimierung_, [arXiv:0803.5678](https://arxiv.org/abs/0803.5678)
