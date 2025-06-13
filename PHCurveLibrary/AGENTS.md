@@ -119,7 +119,7 @@ The library is organised into separate source files:
 ---
 
 ## Additional References
-For a summary of these papers, see [SUMMARY.md](../References/SUMMARY.md).
+For a summary of these papers, see [SUMMARY.md](References/SUMMARY.md).
 
 - **Farouki & Dong (2012), _PHquintic Library_**
   [PDF (UC Davis eScholarship)](https://escholarship.org/content/qt1jk437p5/qt1jk437p5_noSplash_4531c0e73cf4cf42e7af65473e741413.pdf)
