@@ -15,7 +15,7 @@ namespace PHCurveLibrary.Tests
     /// <see cref="PHCurveFactory.CreateQuintic(HermiteControlPoint3D, HermiteControlPoint3D)"/>.
     /// </summary>
     [TestClass]
-    public class PHCurveLibraryTests
+    public class PHCurveFactoryTests
     {
         [TestMethod]
         public void QuinticG2Interpolation_MatchesHermite()
