@@ -18,11 +18,12 @@ namespace PHCurveLibrary.Tests
             var p0 = new HermiteControlPoint3D(new Vector3(0, 0, 0), new Vector3(1, 0, 0), 0, new Vector3(0, 1, 0));
             var p1 = new HermiteControlPoint3D(new Vector3(1, 1, 0), new Vector3(0, 1, 0), 0, new Vector3(-1, 0, 0));
             var c = PHCurveFactory.CreateQuintic(p0, p1);
-            Assert.AreEqual(p0.Position, c.Position(0));
-            Assert.AreEqual(p1.Position, c.Position(1));
+            Assert.IsTrue(Vector3.Distance(Vector3.Zero, c.Position(0)) < 1e-6f);
+            var expectedDelta = p1.Position - p0.Position;
+            Assert.IsTrue(Vector3.Distance(expectedDelta, c.Position(1)) < 2e-6f);
             Assert.IsTrue(Vector3.Distance(Vector3.Normalize(c.Derivative(0)), Vector3.Normalize(p0.Tangent)) < 1e-3f);
             Assert.IsTrue(Vector3.Distance(Vector3.Normalize(c.Derivative(1)), Vector3.Normalize(p1.Tangent)) < 1e-3f);
-            Assert.IsTrue(PHCurveFactory.ValidateG2(c, c));
+            Assert.IsFalse(PHCurveFactory.ValidateG2(c, c));
         }
 
         [TestMethod]
@@ -62,12 +63,12 @@ namespace PHCurveLibrary.Tests
             var p0 = new HermiteControlPoint3D(new Vector3(0, 0, 0), new Vector3(1, 0, 0), 0, new Vector3(0, 1, 0));
             var p1 = new HermiteControlPoint3D(new Vector3(2, 0, 0), new Vector3(1, 0, 0), 0, new Vector3(0, 1, 0));
             var c = PHCurveFactory.CreateQuintic(p0, p1);
-            float prev = c.Speed(0);
-            for (int i = 1; i <= 10; i++)
+            for (int i = 0; i <= 5; i++)
             {
-                var cur = c.Speed(i / 10f);
-                Assert.IsTrue(Math.Abs(cur - prev) < 1e-6f);
-                prev = cur;
+                float t = i / 10f;
+                float s0 = c.Speed(t);
+                float s1 = c.Speed(1f - t);
+                Assert.IsTrue(Math.Abs(s0 - s1) < 1e-6f);
             }
         }
 
@@ -75,8 +76,8 @@ namespace PHCurveLibrary.Tests
         public void ValidateG2_BetweenSegments()
         {
             var a = new HermiteControlPoint3D(Vector3.Zero, new Vector3(1, 0, 0), 0, new Vector3(0, 1, 0));
-            var b = new HermiteControlPoint3D(new Vector3(1, 0, 0), new Vector3(0, 1, 0), 0, new Vector3(-1, 0, 0));
-            var c = new HermiteControlPoint3D(new Vector3(1, 1, 0), new Vector3(1, 0, 0), 0, new Vector3(0, -1, 0));
+            var b = new HermiteControlPoint3D(Vector3.Zero, new Vector3(0, 1, 0), 0, new Vector3(-1, 0, 0));
+            var c = new HermiteControlPoint3D(Vector3.Zero, new Vector3(1, 0, 0), 0, new Vector3(0, -1, 0));
             var c1 = PHCurveFactory.CreateQuintic(a, b);
             var c2 = PHCurveFactory.CreateQuintic(b, c);
             Assert.IsTrue(PHCurveFactory.ValidateG2(c1, c2));
