@@ -56,14 +56,10 @@ namespace CubicPHCurve
             Vector3 T = Vector3.Normalize(tangent);
             Vector3 N = Vector3.Normalize(normal);
             Vector3 B = Vector3.Normalize(Vector3.Cross(T, N));
-            // Matrix4x4 expects basis vectors as **columns**. Construct the
-            // rotation matrix so that its columns form the orthonormal frame
-            // (T, N, B) rather than treating them as rows which would yield the
-            // transpose and thus an incorrect orientation.
             var rot = new Matrix4x4(
-                T.X, N.X, B.X, 0f,
-                T.Y, N.Y, B.Y, 0f,
-                T.Z, N.Z, B.Z, 0f,
+                T.X, T.Y, T.Z, 0f,
+                N.X, N.Y, N.Z, 0f,
+                B.X, B.Y, B.Z, 0f,
                 0f, 0f, 0f, 1f);
             return Quaternion.CreateFromRotationMatrix(rot);
         }
@@ -79,120 +75,17 @@ namespace CubicPHCurve
 
         /// <summary>
         /// Create a PH curve segment directly from two Hermite control points
-        /// taking tangent, normal and curvature information at both ends into
-        /// account. The implementation follows the quaternion formulation of
-        /// cubic PH curves. The resulting curve starts at <paramref name="cp0"/>
-        /// and its derivative satisfies all <c>G²</c> constraints. The end
-        /// position is implied by the PH formulation and may differ slightly
-        /// from <paramref name="cp1"/> if the provided data is inconsistent.
+        /// by computing derivative polynomial coefficients algebraically.
         /// </summary>
         public static CubicPHCurve3D FromControlPoints(ControlPoint cp0, ControlPoint cp1)
         {
-            Vector3 t0 = cp0.Tangent;
-            Vector3 t1 = cp1.Tangent;
-
-            Quaternion q0 = QuaternionFromDerivative(t0, cp0.Normal);
-            Quaternion q1 = QuaternionFromDerivative(t1, cp1.Normal);
-
-            Vector3 k0Vec = cp0.Curvature * t0.LengthSquared() *
-                (cp0.Normal == Vector3.Zero ? Vector3.UnitY : Vector3.Normalize(cp0.Normal));
-            Vector3 k1Vec = cp1.Curvature * t1.LengthSquared() *
-                (cp1.Normal == Vector3.Zero ? Vector3.UnitY : Vector3.Normalize(cp1.Normal));
-
-            Quaternion[] basis =
-            {
-                new Quaternion(1f, 0f, 0f, 0f),
-                new Quaternion(0f, 1f, 0f, 0f),
-                new Quaternion(0f, 0f, 1f, 0f),
-                new Quaternion(0f, 0f, 0f, 1f)
-            };
-
-            var M = Matrix<float>.Build.Dense(6, 4);
-            for (int j = 0; j < 4; ++j)
-            {
-                Quaternion e = basis[j];
-                Vector3 col0 = V(e * BasisI * Quaternion.Conjugate(q0) + q0 * BasisI * Quaternion.Conjugate(e));
-                // Use the same sign convention for both end points. The
-                // previous version used a negated expression which produced
-                // an incorrect linear system and thus wrong quaternion
-                // coefficients.
-                Vector3 col1 = V(e * BasisI * Quaternion.Conjugate(q1) + q1 * BasisI * Quaternion.Conjugate(e));
-                M[0, j] = col0.X; M[1, j] = col0.Y; M[2, j] = col0.Z;
-                M[3, j] = col1.X; M[4, j] = col1.Y; M[5, j] = col1.Z;
-            }
-
-            Quaternion K = Scale(q1, 2f) - Scale(q0, 2f);
-            Vector3 const1 = V(K * BasisI * Quaternion.Conjugate(q1) + q1 * BasisI * Quaternion.Conjugate(K));
-
-            var b = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[]
-            {
-                k0Vec.X * 0.5f, k0Vec.Y * 0.5f, k0Vec.Z * 0.5f,
-                k1Vec.X * 0.5f - const1.X, k1Vec.Y * 0.5f - const1.Y, k1Vec.Z * 0.5f - const1.Z
-            });
-
-            MathNet.Numerics.LinearAlgebra.Vector<float> x = M.Svd(true).Solve(b);
-
-            Quaternion qd1 = new(x[0], x[1], x[2], x[3]);
-            Quaternion qd2 = q1 - q0 - qd1;
-
-            static Vector3 Integration(Vector3 A, Vector3 B, Vector3 C, Vector3 D, Vector3 E)
-                => A + B * 0.5f + C * (1f / 3f) + D * 0.25f + E * 0.2f;
-
-            Vector3 targetDiff = cp1.Position - cp0.Position;
-
-            // Use a few more iterations to ensure the nonlinear system
-            // converges in typical cases.
-            for (int iter = 0; iter < 20; ++iter)
-            {
-                var co = DerivativeCoefficientsFromQuaternions(q0, qd1, qd2);
-                Vector3 diff = Integration(co.A, co.B, co.C, co.D, co.E);
-
-                var residual = MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(9);
-                // curvature/normal residuals
-                var current = M * MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[] { qd1.X, qd1.Y, qd1.Z, qd1.W });
-                residual.SetSubVector(0, 6, current - b);
-                // position residual
-                residual[6] = diff.X - targetDiff.X;
-                residual[7] = diff.Y - targetDiff.Y;
-                residual[8] = diff.Z - targetDiff.Z;
-
-                if (residual.L2Norm() < 1e-6f)
-                    break;
-
-                // numerical Jacobian 9x4
-                var J = Matrix<float>.Build.Dense(9, 4);
-                float eps = 1e-4f;
-                for (int j = 0; j < 4; ++j)
-                {
-                    Quaternion delta = j switch
-                    {
-                        0 => new Quaternion(eps, 0f, 0f, 0f),
-                        1 => new Quaternion(0f, eps, 0f, 0f),
-                        2 => new Quaternion(0f, 0f, eps, 0f),
-                        _ => new Quaternion(0f, 0f, 0f, eps)
-                    };
-                    Quaternion qd1Pert = qd1 + delta;
-                    Quaternion qd2Pert = q1 - q0 - qd1Pert;
-                    var c = DerivativeCoefficientsFromQuaternions(q0, qd1Pert, qd2Pert);
-                    Vector3 d = Integration(c.A, c.B, c.C, c.D, c.E);
-                    var cur = M * MathNet.Numerics.LinearAlgebra.Vector<float>.Build.Dense(new float[] { qd1Pert.X, qd1Pert.Y, qd1Pert.Z, qd1Pert.W });
-                    J[0, j] = (cur[0] - current[0]) / eps;
-                    J[1, j] = (cur[1] - current[1]) / eps;
-                    J[2, j] = (cur[2] - current[2]) / eps;
-                    J[3, j] = (cur[3] - current[3]) / eps;
-                    J[4, j] = (cur[4] - current[4]) / eps;
-                    J[5, j] = (cur[5] - current[5]) / eps;
-                    Vector3 g = (d - diff) / eps;
-                    J[6, j] = g.X; J[7, j] = g.Y; J[8, j] = g.Z;
-                }
-
-                var deltaX = J.Svd(true).Solve(-residual);
-                qd1 += new Quaternion(deltaX[0], deltaX[1], deltaX[2], deltaX[3]);
-                qd2 = q1 - q0 - qd1;
-            }
-
-            var coeffs = DerivativeCoefficientsFromQuaternions(q0, qd1, qd2);
-            return new CubicPHCurve3D(coeffs.A, coeffs.B, coeffs.C, coeffs.D, coeffs.E, cp0.Position);
+            Vector3 delta = cp1.Position - cp0.Position;
+            Vector3 A = cp0.Tangent;
+            Vector3 S = cp1.Tangent - cp0.Tangent;
+            Vector3 T = delta - cp0.Tangent;
+            Vector3 B = 6f * T - 2f * S;
+            Vector3 C = 3f * S - 6f * T;
+            return new CubicPHCurve3D(A, B, C, Vector3.Zero, Vector3.Zero, cp0.Position);
         }
 
         /// <summary>
@@ -245,9 +138,7 @@ namespace CubicPHCurve
             {
                 Quaternion e = basis[j];
                 Vector3 col0 = V(e*BasisI*Quaternion.Conjugate(q0) + q0*BasisI*Quaternion.Conjugate(e));
-                // Same fix for the helper method used during coefficient
-                // computation.
-                Vector3 col1 = V(e*BasisI*Quaternion.Conjugate(q1) + q1*BasisI*Quaternion.Conjugate(e));
+                Vector3 col1 = V(-e*BasisI*Quaternion.Conjugate(q1) - q1*BasisI*Quaternion.Conjugate(e));
                 M[0,j] = col0.X; M[1,j]=col0.Y; M[2,j]=col0.Z;
                 M[3,j] = col1.X; M[4,j]=col1.Y; M[5,j]=col1.Z;
             }
