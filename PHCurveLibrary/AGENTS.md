@@ -65,8 +65,8 @@ The library is organised into separate source files:
   - `CreateQuintic(p0, p1)` → returns `PHCurve3D`.
   - `ValidateG2(a, b)` → checks position, tangent, normal continuity.
 - **References:**
-  - Jaklić et al. (2015), _G² Quintic Hermite Interpolation_, NM TMA 8(3):219–236.
-  - Farouki & Dong (2012), _PHquintic Library_, Technical Report.
+  - Jaklić et al. (2015), _G² Quintic Hermite Interpolation_, NM TMA 8(3):219–236. [Preprint](https://osebje.famnit.upr.si/~vito.vitrih/papers/G2PHDeg5_NM_TMA_revision.pdf) [Local PDF](References/Jaklic_et_al_2015_G2_Quintic_PH_Interpolation.pdf)
+  - Farouki & Dong (2012), _PHquintic Library_, Technical Report. [PDF](https://escholarship.org/content/qt1jk437p5/qt1jk437p5_noSplash_4531c0e73cf4cf42e7af65473e741413.pdf) [Local PDF](References/Farouki_Dong_2012_PHquintic_Library.pdf)
 
 ---
 
@@ -78,7 +78,7 @@ The library is organised into separate source files:
   - `BuildPath()` → returns `List<PHCurve3D>`.
   - `ValidatePathG2()` → iterates `ValidateG2`.
 - **References:**
-  - Albrecht & Farouki (1996), _Homotopy Methods for PH Splines_, CAGD 13(3):291–305.
+  - Albrecht & Farouki (1996), _Homotopy Methods for PH Splines_, CAGD 13(3):291–305. [DOI](https://doi.org/10.1007/BF02124754)
 
 ---
 
@@ -91,8 +91,8 @@ The library is organised into separate source files:
   - `CreateClothoid(p0, p1, κ0, κ1)`
   - `CreateRationalCubic(p0, p1, weights)`
 - **References:**
-  - Walton & Meek (1996), _Clothoid Approximation_, CAGD 13(9):513–526.
-  - Habib & Sakai (2010), _Rational Cubic Spirals_, CAGD.
+  - Walton & Meek (1996), _Clothoid Approximation_, CAGD 13(9):513–526. [PDF](https://www.researchgate.net/profile/Dereck_Meek/publication/222850474_G2_curve_design_with_a_pair_of_Pythagorean_Hodograph_quintic_spiral_segments/links/0fcfd50bb539c74254000000/G2-curve-design-with-a-pair-of-Pythagorean-Hodograph-quintic-spiral-segments.pdf)
+  - Habib & Sakai (2010), _Rational Cubic Spirals_, CAGD. [DOI](https://doi.org/10.1016/j.cad.2010.07.006)
 
 ---
 
@@ -106,7 +106,7 @@ The library is organised into separate source files:
   - `Evaluate(curve)` → computes quality metrics.
   - `SelectBest(candidates)` → picks minimal‐energy solution.
 - **References:**
-  - Farouki et al. (2008), _Optimization of Spatial PH Quintics_, CAGD 25(3):274–297.
+  - Farouki et al. (2008), _Optimization of Spatial PH Quintics_, CAGD 25(3):274–297. [DOI](https://doi.org/10.1016/j.cagd.2007.09.007) [Local PDF](References/Farouki_et_al_2008_Identification_of_Spatial_PH_Quintic_Hermite_Interpolants.pdf)
 
 ---
 <!---
