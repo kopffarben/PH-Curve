@@ -9,6 +9,11 @@ The library is organised into separate source files:
 - `PHCurve3D.cs` implements the PH curve representation.
 - `PHCurveFactory.cs` provides construction and validation helpers.
 
+## Documentation Requirements
+
+- **Language:** All comments must be written in English.
+- **Public members:** should include XML documentation comments.
+- **Mathematical context:** All comments should include XML documentation summarising the underlying mathematics. Cite relevant formulas or algorithms and include academic references when appropriate.
 
 ---
 
