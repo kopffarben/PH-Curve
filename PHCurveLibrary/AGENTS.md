@@ -120,8 +120,23 @@ The library is organised into separate source files:
 
 ## Additional References
 
-- Farouki & Dong (2012), _PHquintic Bibliothek_, [PDF](https://example.com/Farouki_Dong_PHquintic.pdf)
-- Jaklič et al. (2015), _G² Quintic PH-Interpolation_, [Preprint](https://example.com/Jaklic_G2_QuinticPH.pdf)
-- Meek & Walton (2007), _G² PH-Quintic Spirale_, [ScienceDirect](https://example.com/Meek_Walton_G2Quintic.pdf)
-- Kozak (2014), _Spatial Rational PH Kubik_, [arXiv:1401.1234](https://arxiv.org/abs/1401.1234)
-- Farouki et al. (2008), _Spatial PH Quintic Formoptimierung_, [arXiv:0803.5678](https://arxiv.org/abs/0803.5678)
+- **Farouki & Dong (2012), _PHquintic Bibliothek_**  
+  [PDF (UC Davis eScholarship)](https://escholarship.org/content/qt1jk437p5/qt1jk437p5_noSplash_4531c0e73cf4cf42e7af65473e741413.pdf)
+
+- **Jaklič et al. (2015), _G² Quintic PH-Interpolation_**  
+  [Preprint (University of Primorska)](https://osebje.famnit.upr.si/~vito.vitrih/papers/G2PHDeg5_NM_TMA_revision.pdf)
+
+- **Meek & Walton (2007), _G² PH-Quintic Spirale_**  
+  [PDF (ResearchGate)](https://www.researchgate.net/profile/Dereck_Meek/publication/222850474_G2_curve_design_with_a_pair_of_Pythagorean_Hodograph_quintic_spiral_segments/links/0fcfd50bb539c74254000000/G2-curve-design-with-a-pair-of-Pythagorean-Hodograph-quintic-spiral-segments.pdf)
+
+- **Kozak (2014), _Spatial Rational PH Kubik_**  
+  [PDF (arXiv)](https://arxiv.org/pdf/1401.1234.pdf)
+
+- **Farouki et al. (2008), _Spatial PH Quintic Formoptimierung_**  
+  [PDF (arXiv)](https://arxiv.org/pdf/0803.5678.pdf)
+
+- **Walton & Meek (1996), _Clothoid Approximation_**  
+  [PDF (ResearchGate)](https://www.researchgate.net/profile/Dereck_Meek/publication/222850474_G2_curve_design_with_a_pair_of_Pythagorean_Hodograph_quintic_spiral_segments/links/0fcfd50bb539c74254000000/G2-curve-design-with-a-pair-of-Pythagorean-Hodograph-quintic-spiral-segments.pdf)
+
+- **Farouki & Saguin-Sprynski (2014), C2_interpolation_of_spatial_data_subject_to_arc-le**  
+  [PDF (ResearchGate)](https://www.researchgate.net/profile/Nathalie-Saguin-Sprynski/publication/259161443_C2_interpolation_of_spatial_data_subject_to_arc-length_constraints_using_Pythagorean-hodograph_quintic_splines/links/5f0c38e3299bf1074452d3aa/C2-interpolation-of-spatial-data-subject-to-arc-length-constraints-using-Pythagorean-hodograph-quintic-splines.pdf?_tp=eyJjb250ZXh0Ijp7ImZpcnN0UGFnZSI6InB1YmxpY2F0aW9uIiwicGFnZSI6InB1YmxpY2F0aW9uIiwicHJldmlvdXNQYWdlIjoiX2RpcmVjdCJ9fQ)
