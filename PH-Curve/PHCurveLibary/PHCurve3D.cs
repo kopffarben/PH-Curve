@@ -89,5 +89,45 @@ namespace PHCurveLibrary
             var numer = d2 * s - d1 * Vector3.Dot(d1, d2) / s;
             return Vector3.Normalize(numer / (s * s));
         }
+
+        /// <summary>
+        /// Curvature &kappa;(t) = ||r'(t) × r''(t)|| / ||r'(t)||³.
+        /// </summary>
+        /// <param name="t">Normalized parameter.</param>
+        /// <returns>The unsigned curvature magnitude.</returns>
+        public float Curvature(float t)
+        {
+            Vector3 d1 = Derivative(t);
+            Vector3 d2 = SecondDerivative(t);
+            Vector3 cross = Vector3.Cross(d1, d2);
+            float len = d1.Length();
+            if (len < 1e-8f)
+            {
+                return 0f;
+            }
+
+            return cross.Length() / (len * len * len);
+        }
+
+        /// <summary>
+        /// Normalized tangent vector &lt;see cref="TangentUnit(float)"/&gt;.
+        /// </summary>
+        /// <param name="t">Normalized parameter.</param>
+        /// <returns>The unit tangent vector.</returns>
+        public Vector3 Tangent(float t) => TangentUnit(t);
+
+        /// <summary>
+        /// Unit principal normal vector &lt;see cref="PrincipalNormal(float)"/&gt;.
+        /// </summary>
+        /// <param name="t">Normalized parameter.</param>
+        /// <returns>The unit principal normal.</returns>
+        public Vector3 Normal(float t) => PrincipalNormal(t);
+
+        /// <summary>
+        /// Bi-tangent vector B(t) = T(t) × N(t).
+        /// </summary>
+        /// <param name="t">Normalized parameter.</param>
+        /// <returns>The unit bi-tangent vector.</returns>
+        public Vector3 BiTangent(float t) => Vector3.Cross(Tangent(t), Normal(t));
     }
 }

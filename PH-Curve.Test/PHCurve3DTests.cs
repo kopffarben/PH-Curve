@@ -174,5 +174,37 @@ namespace PHCurveLibrary.Tests
             Assert.IsTrue(MathF.Abs(Vector3.Dot(normal, deriv)) < 1e-6f, "Normal not orthogonal");
             Assert.IsTrue(MathF.Abs(normal.Length() - 1f) < 1e-6f, "Normal not unit length");
         }
+
+        /// <summary>
+        /// Verify that curvature, normal, tangent and bi-tangent are computed
+        /// according to the Frenet--Serret formulas for a simple parabola.
+        /// </summary>
+        [TestMethod]
+        public void FrenetFrameQuantities_AreCorrect()
+        {
+            PHCurve3D curve = CreateParabola();
+            float t = 0.25f;
+
+            Vector3 tangent = curve.Tangent(t);
+            Vector3 expectedTangent = Vector3.Normalize(new Vector3(1f, t, 0f));
+            System.Console.WriteLine($"Tangent({t})={tangent}");
+            AssertVector(expectedTangent, tangent, 1e-6f, "Tangent");
+
+            Vector3 normal = curve.Normal(t);
+            Vector3 expectedNormal = Vector3.Normalize(new Vector3(-t, 1f, 0f));
+            System.Console.WriteLine($"Normal({t})={normal}");
+            AssertVector(expectedNormal, normal, 1e-6f, "Normal");
+
+            Vector3 bitan = curve.BiTangent(t);
+            Vector3 expectedBitan = Vector3.Cross(expectedTangent, expectedNormal);
+            System.Console.WriteLine($"BiTangent({t})={bitan}");
+            AssertVector(expectedBitan, bitan, 1e-6f, "BiTangent");
+
+            float curvature = curve.Curvature(t);
+            float speed = MathF.Sqrt(1f + t * t);
+            float expectedCurv = 1f / (speed * speed * speed);
+            System.Console.WriteLine($"Curvature({t})={curvature}");
+            Assert.AreEqual(expectedCurv, curvature, 1e-6f, "Curvature");
+        }
     }
 }
