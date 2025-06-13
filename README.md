@@ -1,50 +1,50 @@
 # PH-Curve
 
-PH-Curve is a small C# library that implements cubic Pythagorean hodograph (PH) curves in three dimensions. The project targets **.NET 8.0** and provides a minimal API for creating and evaluating PH curves as well as fitting a curve to a sequence of control points.
+PH-Curve is a C# library implementing **quintic Pythagorean hodograph (PH) curves** in three dimensions. The project targets **.NET&nbsp;8.0** and exposes a minimal API for constructing and analysing PH segments as well as building multi segment paths.
 
 ## Features
 
-- Construction of `CubicPHCurve3D` segments from Hermite control points
-- Evaluation of derivatives, tangents and normals
-- Support for offset curves and Frenet frame vectors
-- Curve fitting utilities via `CubicPHCurve3DFitter`
+- Construction of `PHCurve3D` segments from Hermite control points via `PHCurveFactory`
+- Evaluation of derivatives and Frenet frame vectors
+- Exact or numerical arc-length evaluation
+- Path assembly utilities in `PathPlanner`
+- Comprehensive MSTest suite demonstrating the mathematical algorithms
 
 ## Building
 
 The solution consists of two projects:
 
-1. **PH-Curve** – class library containing the curve implementation
-2. **PH-Curve.Test** – MSTest project with unit tests
+1. `PHCurveLibrary` – the class library containing the curve implementation
+2. `PHCurveLibrary.Test` – MSTest project with unit tests
 
-To restore dependencies and build the solution run:
+Restore dependencies and build the solution with
 
 ```bash
 dotnet build
 ```
 
-## Running the Tests
+## Running the tests
 
-Execute all unit tests using the following command from the repository root:
+Execute all unit tests from the repository root:
 
 ```bash
 dotnet test
 ```
 
-The tests verify the curve fitting functionality and a variety of geometric computations in `CubicPHCurve3D`.
+The tests cover curve creation, Frenet-frame computations and arc-length evaluation.
 
-## Usage Example
+## Usage example
 
 ```csharp
 using System.Numerics;
-using CubicPHCurve;
+using PHCurveLibrary;
 
-var cp0 = new CubicPHCurve3D.ControlPoint(new Vector3(0, 0, 0), new Vector3(1, 0, 0));
-var cp1 = new CubicPHCurve3D.ControlPoint(new Vector3(1, 1, 0), new Vector3(1, 1, 0));
-CubicPHCurve3D curve = CubicPHCurve3D.FromControlPoints(cp0, cp1);
+var p0 = new HermiteControlPoint3D(new Vector3(0,0,0), Vector3.UnitX, 0f, Vector3.UnitY);
+var p1 = new HermiteControlPoint3D(new Vector3(1,1,0), Vector3.UnitY, 0f, -Vector3.UnitX);
+PHCurve3D curve = PHCurveFactory.CreateQuintic(p0, p1);
 
 Vector3 position = curve.Position(0.5f);
-Vector3 tangent = curve.Tangent(0.5f);
+Vector3 tangent = curve.TangentUnit(0.5f);
 ```
 
-The above snippet creates a PH curve segment from two Hermite points and queries its midpoint position and tangent. The `ControlPoint` struct also stores an optional absolute time value which can be used during curve fitting.
-
+The snippet constructs a PH segment from two Hermite points and queries the position and tangent at the parameter midpoint.
