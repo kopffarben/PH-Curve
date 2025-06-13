@@ -1,6 +1,13 @@
 # AGENTS.md
 
 This document outlines the agent-based architecture of the **PHCurveLibrary** for Pythagorean-Hodograph (PH) curves with G² interpolation. It describes each component (“agent”) and the core data structures, along with the underlying mathematics and key literature references.
+Ignore all commented-out instructions.
+
+<!---  
+irgnore this section, it is only for documentation purposes
+--->
+
+
 ## File Layout
 
 The library is organised into separate source files:
@@ -102,6 +109,8 @@ The library is organised into separate source files:
   - Farouki et al. (2008), _Optimization of Spatial PH Quintics_, CAGD 25(3):274–297.
 
 ---
+<!---
+irgnore this section, it is only for documentation purposes
 
 ## RealTimeController
 - **Responsibility:** Execute PH trajectory in real time.
@@ -117,6 +126,7 @@ The library is organised into separate source files:
   - Farouki (2014), _Offset Curves & Innovations in PH Design_.
 
 ---
+--->
 
 ## Additional References
 For a summary of these papers, see [SUMMARY.md](References/SUMMARY.md).
