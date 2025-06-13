@@ -7,10 +7,10 @@ using PHCurveLibrary;
 namespace PHCurveLibrary.Tests
 {
     /// <summary>
-    /// Unit tests for <see cref="PHCurve3D"/> and <see cref="PHCurveFactory"/> functionality.
+    /// Unit tests for <see cref="PHCurveLibrary"/> and <see cref="PHCurveFactory"/> functionality.
     /// </summary>
     [TestClass]
-    public class PHCurve3DStructTests
+    public class PHCurveLibraryTests
     {
         [TestMethod]
         public void QuinticG2Interpolation_MatchesHermite()
