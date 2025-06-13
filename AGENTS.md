@@ -1,6 +1,7 @@
 # Agent Instructions
 
 This repository contains C# code targeting **.NET 8.0**. The following guidelines apply when working with this project.
+Always name the codex tasks in English.
 
 ## Using .NET
 
