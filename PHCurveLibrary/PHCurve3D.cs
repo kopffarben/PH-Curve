@@ -12,7 +12,9 @@ namespace PHCurveLibrary
     /// Represents a spatial quintic Pythagorean Hodograph (PH) curve. The
     /// derivative of the curve is a polynomial r'(t) = A + Bt + Ct² + Dt³ + Et´
     /// whose squared norm is itself a polynomial. This property enables exact
-    /// arc-length evaluation and simple offsetting.
+    /// arc-length evaluation and simple offsetting. Each instance also stores
+    /// the absolute time interval of the segment so that <c>t</c> can be
+    /// mapped to real time.
     /// </summary>
     public struct PHCurve3D
     {
@@ -32,15 +34,43 @@ namespace PHCurveLibrary
         public readonly Vector3 E;
 
         /// <summary>
-        /// Creates a PH curve from derivative coefficients.
+        /// Absolute start time of the segment. The parameter <c>t=0</c>
+        /// corresponds to this time value.
         /// </summary>
-        public PHCurve3D(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 e)
+        public readonly float StartTime;
+
+        /// <summary>
+        /// Absolute end time of the segment. The parameter <c>t=1</c>
+        /// corresponds to this time value.
+        /// </summary>
+        public readonly float EndTime;
+
+        /// <summary>
+        /// Creates a PH curve from derivative coefficients and time interval.
+        /// </summary>
+        /// <param name="a">Constant hodograph term.</param>
+        /// <param name="b">Linear hodograph term.</param>
+        /// <param name="c">Quadratic hodograph term.</param>
+        /// <param name="d">Cubic hodograph term.</param>
+        /// <param name="e">Quartic hodograph term.</param>
+        /// <param name="startTime">Absolute start time of the segment.</param>
+        /// <param name="endTime">Absolute end time of the segment.</param>
+        public PHCurve3D(
+            Vector3 a,
+            Vector3 b,
+            Vector3 c,
+            Vector3 d,
+            Vector3 e,
+            float startTime,
+            float endTime)
         {
             A = a;
             B = b;
             C = c;
             D = d;
             E = e;
+            StartTime = startTime;
+            EndTime = endTime;
         }
 
         /// <summary>

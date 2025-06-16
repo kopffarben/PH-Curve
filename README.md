@@ -41,7 +41,7 @@ using PHCurveLibrary;
 
 var p0 = new HermiteControlPoint3D(new Vector3(0,0,0), Vector3.UnitX, 0f, Vector3.UnitY);
 var p1 = new HermiteControlPoint3D(new Vector3(1,1,0), Vector3.UnitY, 0f, -Vector3.UnitX);
-PHCurve3D curve = PHCurveFactory.CreateQuintic(p0, p1);
+PHCurve3D curve = PHCurveFactory.CreateQuintic(p0, p1, 0f, 1f);
 
 Vector3 position = curve.Position(0.5f);
 Vector3 tangent = curve.TangentUnit(0.5f);
