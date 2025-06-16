@@ -25,7 +25,7 @@ namespace PHCurveLibrary.Tests
 
         private static PHCurve3D CreateParabola()
         {
-            return new PHCurve3D(A, B, C, D, E);
+            return new PHCurve3D(A, B, C, D, E, 0f, 1f);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace PHCurveLibrary.Tests
             Vector3 c = new(0f, 0f, 1f);
             Vector3 d = new(1f, 0f, 0f);
             Vector3 e = new(0f, 1f, 0f);
-            return new PHCurve3D(a, b, c, d, e);
+            return new PHCurve3D(a, b, c, d, e, 0f, 1f);
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace PHCurveLibrary.Tests
             Vector3 a = new(1f, 0f, 0f);
             Vector3 b = new(2f, 2f, 0f);
             Vector3 c = new(0f, 2f, 0f);
-            PHCurve3D curve = new(a, b, c, Vector3.Zero, Vector3.Zero);
+            PHCurve3D curve = new(a, b, c, Vector3.Zero, Vector3.Zero, 0f, 1f);
 
             float expected = 1f + 1f + 2f / 3f; // s(1)
             float length = curve.ArcLength(1f);
@@ -298,7 +298,7 @@ namespace PHCurveLibrary.Tests
         {
             HermiteControlPoint3D p0 = new(new Vector3(0, 0, 0), new Vector3(1, 0, 0), 0f, Vector3.UnitY);
             HermiteControlPoint3D p1 = new(new Vector3(1, 1, 0), new Vector3(0, 1, 0), 0f, Vector3.UnitY);
-            PHCurve3D curve = PHCurveFactory.CreateQuintic(p0, p1);
+            PHCurve3D curve = PHCurveFactory.CreateQuintic(p0, p1, 0f, 1f);
 
             float analytic = curve.ArcLength(1f);
             float numeric = NumericalArcLength(curve, 1f);
@@ -322,6 +322,28 @@ namespace PHCurveLibrary.Tests
 
             System.Console.WriteLine($"ArcLength_HigherOrderCurve_FallsBackToNumerical: analytic {analytic}, numeric {numeric}");
             Assert.AreEqual(numeric, analytic, 1e-4f);
+        }
+
+        /// <summary>
+        /// The StartTime and EndTime fields must be stored and allow mapping of
+        /// absolute time to the normalised parameter.
+        /// </summary>
+        [TestMethod]
+        public void StartAndEndTime_MapAbsoluteTime()
+        {
+            float start = 5f;
+            float end = 8f;
+            PHCurve3D curve = new(A, B, C, D, E, start, end);
+
+            Assert.AreEqual(start, curve.StartTime, 1e-6f);
+            Assert.AreEqual(end, curve.EndTime, 1e-6f);
+
+            float midTime = (start + end) / 2f;
+            float param = (midTime - curve.StartTime) / (curve.EndTime - curve.StartTime);
+            Vector3 expected = curve.Position(0.5f);
+            Vector3 actual = curve.Position(param);
+
+            AssertVector(expected, actual, 1e-6f, "Position at mid time");
         }
     }
 }

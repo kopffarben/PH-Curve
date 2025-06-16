@@ -30,7 +30,7 @@ namespace PHCurveLibrary.Tests
             HermiteControlPoint3D p0 = new(new Vector3(0, 0, 0), new Vector3(1, 0, 0), 0, new Vector3(0, 1, 0));
             HermiteControlPoint3D p1 = new(new Vector3(1, 1, 0), new Vector3(0, 1, 0), 0, new Vector3(-1, 0, 0));
 
-            PHCurve3D c = PHCurveFactory.CreateQuintic(p0, p1);
+            PHCurve3D c = PHCurveFactory.CreateQuintic(p0, p1, 0f, 1f);
 
             Console.WriteLine(
                 "QuinticG2Interpolation_MatchesHermite: Created curve from ({0}) to ({1}).",
@@ -60,7 +60,7 @@ namespace PHCurveLibrary.Tests
             // expression of r'(t). This verifies that the integration constants
             // in Position(t) are correct.
             HermiteControlPoint3D p = new(new Vector3(0, 0, 0), new Vector3(1, 2, 0), 0.1f, new Vector3(-2, 1, 0));
-            PHCurve3D c = PHCurveFactory.CreateQuintic(p, p);
+            PHCurve3D c = PHCurveFactory.CreateQuintic(p, p, 0f, 1f);
             Console.WriteLine(
                 "FiniteDifferenceDerivative_ApproximatesAnalytic: Start derivative comparison.");
             for (int i = 1; i < 10; i++)
@@ -83,7 +83,7 @@ namespace PHCurveLibrary.Tests
             // and serves as a basic sanity check for the Frenet frame
             // computation.
             HermiteControlPoint3D p = new(new Vector3(0, 0, 0), new Vector3(1, 0, 0), 0.5f, new Vector3(0, 1, 0));
-            PHCurve3D c = PHCurveFactory.CreateQuintic(p, p);
+            PHCurve3D c = PHCurveFactory.CreateQuintic(p, p, 0f, 1f);
             float d = 0.2f;
             Console.WriteLine("OffsetPoint_MaintainsDistance: Checking offset distance {0}.", d);
             for (int i = 0; i <= 5; i++)
@@ -105,7 +105,7 @@ namespace PHCurveLibrary.Tests
             // respect to t -> 1 - t.
             HermiteControlPoint3D p0 = new(new Vector3(0, 0, 0), new Vector3(1, 0, 0), 0, new Vector3(0, 1, 0));
             HermiteControlPoint3D p1 = new(new Vector3(2, 0, 0), new Vector3(1, 0, 0), 0, new Vector3(0, 1, 0));
-            PHCurve3D c = PHCurveFactory.CreateQuintic(p0, p1);
+            PHCurve3D c = PHCurveFactory.CreateQuintic(p0, p1, 0f, 1f);
             Console.WriteLine("Speed_IsMonotonicForStraightLine: Testing symmetry of speed.");
             for (int i = 0; i <= 5; i++)
             {
@@ -127,8 +127,8 @@ namespace PHCurveLibrary.Tests
             HermiteControlPoint3D a = new(Vector3.Zero, new Vector3(1, 0, 0), 0, new Vector3(0, 1, 0));
             HermiteControlPoint3D b = new(Vector3.Zero, new Vector3(0, 1, 0), 0, new Vector3(-1, 0, 0));
             HermiteControlPoint3D cPoint = new(Vector3.Zero, new Vector3(1, 0, 0), 0, new Vector3(0, -1, 0));
-            PHCurve3D c1 = PHCurveFactory.CreateQuintic(a, b);
-            PHCurve3D c2 = PHCurveFactory.CreateQuintic(b, cPoint);
+            PHCurve3D c1 = PHCurveFactory.CreateQuintic(a, b, 0f, 1f);
+            PHCurve3D c2 = PHCurveFactory.CreateQuintic(b, cPoint, 0f, 1f);
             Console.WriteLine("ValidateG2_BetweenSegments: Checking join between segments c1 and c2.");
             Assert.IsTrue(PHCurveFactory.ValidateG2(c1, c2));
             Console.WriteLine("ValidateG2_BetweenSegments: Segments pass G2 validation.");
@@ -141,7 +141,7 @@ namespace PHCurveLibrary.Tests
         public void TangentUnit_EqualsNormalizedDerivative()
         {
             HermiteControlPoint3D p = new(new Vector3(0, 0, 0), new Vector3(1, 0.5f, 0), 0.2f, new Vector3(0, 0, 1));
-            PHCurve3D c = PHCurveFactory.CreateQuintic(p, p);
+            PHCurve3D c = PHCurveFactory.CreateQuintic(p, p, 0f, 1f);
             Console.WriteLine(
                 "TangentUnit_EqualsNormalizedDerivative: Comparing tangent unit vector against derivative.");
             for (int i = 0; i <= 10; i++)
@@ -161,7 +161,7 @@ namespace PHCurveLibrary.Tests
         public void PrincipalNormal_IsUnitAndOrthogonal()
         {
             HermiteControlPoint3D p = new(new Vector3(0, 0, 0), new Vector3(1, 1, 0), 0.5f, Vector3.UnitZ);
-            PHCurve3D c = PHCurveFactory.CreateQuintic(p, p);
+            PHCurve3D c = PHCurveFactory.CreateQuintic(p, p, 0f, 1f);
             Console.WriteLine("PrincipalNormal_IsUnitAndOrthogonal: Checking orthogonality and unit length.");
             for (int i = 1; i < 10; i++)
             {
@@ -183,8 +183,8 @@ namespace PHCurveLibrary.Tests
             HermiteControlPoint3D a = new(Vector3.Zero, Vector3.UnitX, 0, Vector3.UnitY);
             HermiteControlPoint3D b1 = new(Vector3.One, Vector3.UnitX, 0, Vector3.UnitY);
             HermiteControlPoint3D b2 = new(Vector3.One, Vector3.UnitX, 0, Vector3.UnitZ);
-            PHCurve3D c1 = PHCurveFactory.CreateQuintic(a, b1);
-            PHCurve3D c2 = PHCurveFactory.CreateQuintic(a, b2);
+            PHCurve3D c1 = PHCurveFactory.CreateQuintic(a, b1, 0f, 1f);
+            PHCurve3D c2 = PHCurveFactory.CreateQuintic(a, b2, 0f, 1f);
             Console.WriteLine("ValidateG2_FailsWhenNormalsDiffer: Comparing segments with different normals.");
             Assert.IsFalse(PHCurveFactory.ValidateG2(c1, c2));
             Console.WriteLine("ValidateG2_FailsWhenNormalsDiffer: Validation failed as expected.");
@@ -200,7 +200,7 @@ namespace PHCurveLibrary.Tests
         {
             HermiteControlPoint3D p0 = new(Vector3.Zero, new Vector3(2, 0, 0), 0f, Vector3.UnitY);
             HermiteControlPoint3D p1 = new(new Vector3(2, 0, 0), new Vector3(2, 0, 0), 0f, Vector3.UnitY);
-            PHCurve3D c = PHCurveFactory.CreateQuintic(p0, p1);
+            PHCurve3D c = PHCurveFactory.CreateQuintic(p0, p1, 0f, 1f);
 
             float length = NumericalArcLength(c);
             Console.WriteLine(
@@ -221,7 +221,7 @@ namespace PHCurveLibrary.Tests
                 new Vector3(0, 0, 0), new Vector3(1, 0, 0), 0.5f, new Vector3(0, 1, 0));
             HermiteControlPoint3D p1 = new(
                 new Vector3(1, 1, 0), new Vector3(0, 1, 0), -0.25f, new Vector3(-1, 0, 0));
-            PHCurve3D curve = PHCurveFactory.CreateQuintic(p0, p1);
+            PHCurve3D curve = PHCurveFactory.CreateQuintic(p0, p1, 0f, 1f);
 
             Console.WriteLine("SecondDerivative_ReflectsEndpointCurvature: verifying r''(0) and r''(1).");
 
@@ -233,6 +233,31 @@ namespace PHCurveLibrary.Tests
 
             Assert.IsTrue(Vector3.Distance(expected0, d0) < 1e-5f);
             Assert.IsTrue(Vector3.Distance(d1 - d0, expectedDelta) < 1e-5f);
+        }
+
+        /// <summary>
+        /// CreateQuintic must assign StartTime and EndTime correctly.
+        /// </summary>
+        [TestMethod]
+        public void CreateQuintic_AssignsTimeInterval()
+        {
+            HermiteControlPoint3D p0 = new(Vector3.Zero, Vector3.UnitX, 0f, Vector3.UnitY);
+            HermiteControlPoint3D p1 = new(Vector3.One, Vector3.UnitY, 0f, -Vector3.UnitX);
+
+            float start = 2f;
+            float end = 4f;
+
+            PHCurve3D curve = PHCurveFactory.CreateQuintic(p0, p1, start, end);
+
+            Assert.AreEqual(start, curve.StartTime, 1e-6f);
+            Assert.AreEqual(end, curve.EndTime, 1e-6f);
+
+            float mid = (start + end) / 2f;
+            float param = (mid - start) / (end - start);
+            Vector3 expected = curve.Position(0.5f);
+            Vector3 actual = curve.Position(param);
+
+            Assert.IsTrue(Vector3.Distance(expected, actual) < 1e-6f);
         }
 
         private static float NumericalArcLength(PHCurve3D c, int steps = 100)

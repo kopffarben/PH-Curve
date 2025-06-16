@@ -10,7 +10,7 @@ namespace PHCurveLibrary
     /// <summary>
     /// Builds a multi-segment path composed of <see cref="PHCurve3D"/> segments.
     /// Each segment is created from successive Hermite control points using
-    /// <see cref="PHCurveFactory.CreateQuintic(PHCurveLibrary.HermiteControlPoint3D, PHCurveLibrary.HermiteControlPoint3D)"/>.
+    /// <see cref="PHCurveFactory.CreateQuintic(PHCurveLibrary.HermiteControlPoint3D, PHCurveLibrary.HermiteControlPoint3D, float, float)"/>.
     /// </summary>
     public class PathPlanner
     {
@@ -23,7 +23,7 @@ namespace PHCurveLibrary
         /// <param name="end">End Hermite data.</param>
         public void AddSegment(HermiteControlPoint3D start, HermiteControlPoint3D end)
         {
-            PHCurve3D curve = PHCurveFactory.CreateQuintic(start, end);
+            PHCurve3D curve = PHCurveFactory.CreateQuintic(start, end, 0f, 1f);
             segments.Add(curve);
         }
 

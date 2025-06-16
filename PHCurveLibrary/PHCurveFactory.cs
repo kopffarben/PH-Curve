@@ -22,7 +22,13 @@ namespace PHCurveLibrary
         /// </summary>
         /// <param name="p0">Start Hermite control point.</param>
         /// <param name="p1">End Hermite control point.</param>
-        public static PHCurve3D CreateQuintic(HermiteControlPoint3D p0, HermiteControlPoint3D p1)
+        /// <param name="startTime">Absolute start time of the segment.</param>
+        /// <param name="endTime">Absolute end time of the segment.</param>
+        public static PHCurve3D CreateQuintic(
+            HermiteControlPoint3D p0,
+            HermiteControlPoint3D p1,
+            float startTime,
+            float endTime)
         {
             Vector3 A = p0.Tangent;
             Vector3 T1 = p1.Tangent;
@@ -50,7 +56,7 @@ namespace PHCurveLibrary
             Vector3 D = new(Coefs[1, 0], Coefs[1, 1], Coefs[1, 2]);
             Vector3 E = new(Coefs[2, 0], Coefs[2, 1], Coefs[2, 2]);
 
-            return new PHCurve3D(A, B, C, D, E);
+            return new PHCurve3D(A, B, C, D, E, startTime, endTime);
         }
 
         /// <summary>
