@@ -51,14 +51,14 @@ Diese Eigenschaften machen PH-Kurven ideal für CNC-Interpolation, Bewegungssteu
 - Adaptive Segmentierung: Unterteilen bei zu großem Fehler
 - Fußpunkt-Verbesserung: Parameterzuweisung iterativ optimieren
 - Strafterme: z. B. Biegeenergie, Rotationsmaß
-- PDF-Link: [Kostenloser Download](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.38.7640&rep=rep1&type=pdf)
+- PDF-Link: [Kostenloser Download](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.38.7640&rep=rep1&type=pdf) [Local PDF](Farouki_Saitou_Tsai_1998_Least_Squares_Approximation_PH_Curvs.pdf)
 
 ### 3. Evolutionsbasierte Anpassung (Aigner, Jüttler et al. 2007)
 - Dynamische Evolution: \( P(t, \tau) \) entwickelt sich über fiktive Zeit \( \tau \)
 - Inspiriert von aktiven Konturen („Snakes“)
 - Konvergenz ähnlich Gauss-Newton-Verfahren
 - Robust gegenüber Parametrisierungsproblemen
-- PDF-Link: [Kostenloser Download](https://www.ag.jku.at/ftp/pub/Preprints/JKU-2007-02.pdf)
+- PDF-Link: [Kostenloser Download](https://www.ag.jku.at/ftp/pub/Preprints/JKU-2007-02.pdf) [Local PDF](Aigner_Sir_Jüttler_2007_Least_Squares_Fitting.pdf)
 
 ### 4. Homotopie-Fortsetzung (Albrecht & Farouki 1996)
 - Verbindung einer einfachen Ausgangskurve mit Zielkurve
@@ -67,9 +67,9 @@ Diese Eigenschaften machen PH-Kurven ideal für CNC-Interpolation, Bewegungssteu
 
 ### 5. Theorie und neuere Entwicklungen
 - **Weierstraß-Theorem** für PH-Kurven (Choi & Moon 2008): beliebig gute Approximation
-- **Rationale PH-Kurven** und PH-Kurven in Minkowski-Räumen (Kosinka & Lavička 2014)
+ - **Rationale PH-Kurven** und PH-Kurven in Minkowski-Räumen (Kosinka & Lavička 2014) [Local PDF](Kosinka_Lavicka_2014_Survey_of_Recent_Advances.pdf)
 - **Robotik**: Pfade mit Krümmungs- und Steuergrenzwerten
-- **Hochgeschwindigkeits-CNC**: vibrationsfreie Bewegung und konstante Abtragsraten
+ - **Hochgeschwindigkeits-CNC**: vibrationsfreie Bewegung und konstante Abtragsraten [Local PDF](Farouki_Computer_numerical_control_algorithms.pdf)
 
 ## Leistungsbewertung
 
@@ -92,9 +92,11 @@ PH-Kurven bieten eine bemerkenswerte Kombination aus geometrischer Flexibilität
 Trotz der höheren Komplexität im Vergleich zu klassischen Splines haben sich PH-Kurvenmethoden als praktische Werkzeuge in der Technik und Grafik etabliert. Die Algorithmen reichen von schnellen lokalen Interpolationen bis zu robusten globalen Optimierern. Richtig implementiert, ermöglichen sie eine deutlich verbesserte Pfadqualität und Effizienz.
 
 ## Empfohlene Literatur und Downloads
-- Farouki et al. 1998: [Least-Squares-Approximation mit PH-Kurven (PDF)](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.38.7640&rep=rep1&type=pdf)
-- Aigner et al. 2007: [Evolutionsbasierte PH-Anpassung (PDF)](https://www.ag.jku.at/ftp/pub/Preprints/JKU-2007-02.pdf)
-- Kosinka & Lavička 2014: *PH-Kurven-Übersicht* (Open Access)
+ - Farouki et al. 1998: [Least-Squares-Approximation mit PH-Kurven (PDF)](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.38.7640&rep=rep1&type=pdf) [Local PDF](Farouki_Saitou_Tsai_1998_Least_Squares_Approximation_PH_Curvs.pdf)
+ - Aigner et al. 2007: [Evolutionsbasierte PH-Anpassung (PDF)](https://www.ag.jku.at/ftp/pub/Preprints/JKU-2007-02.pdf) [Local PDF](Aigner_Sir_Jüttler_2007_Least_Squares_Fitting.pdf)
+ - Kosinka & Lavička 2014: *PH-Kurven-Übersicht* (Open Access) [Local PDF](Kosinka_Lavicka_2014_Survey_of_Recent_Advances.pdf)
+ - Pastva 1998: *Bezier Curve Fitting* [Local PDF](Pastva_1998_Bezier_Curve_Fitting.pdf)
+ - Farouki: *Computer Numerical Control Algorithms* [Local PDF](Farouki_Computer_numerical_control_algorithms.pdf)
 - Farouki 2008: *Pythagorean-Hodograph Curves: Algebra and Geometry Inseparable* (Buch)
 
 Gib mir Bescheid, wenn du eine Implementierung, Grafiken oder eine LaTeX/PDF-Version benötigst.

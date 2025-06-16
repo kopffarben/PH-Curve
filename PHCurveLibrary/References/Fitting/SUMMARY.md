@@ -51,14 +51,14 @@ These features make PH curves ideal for CNC interpolation, motion control, and p
 - Adaptive segmentation: subdivide if error exceeds threshold
 - Footpoint refinement: reassign parameter values iteratively
 - Add penalty terms (e.g., bending energy, rotation number)
-- PDF link: [Free download available](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.38.7640&rep=rep1&type=pdf)
+- PDF link: [Free download available](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.38.7640&rep=rep1&type=pdf) [Local PDF](Farouki_Saitou_Tsai_1998_Least_Squares_Approximation_PH_Curvs.pdf)
 
 ### 3. Evolution-Based Curve Fitting (Aigner, Jüttler et al. 2007)
 - Dynamic evolution: \( P(t, \tau) \) evolves over fictitious time \( \tau \)
 - Inspired by active contour models
 - Gauss-Newton-like convergence
 - Robust to parametrization issues
-- PDF link: [Free download available](https://www.ag.jku.at/ftp/pub/Preprints/JKU-2007-02.pdf)
+- PDF link: [Free download available](https://www.ag.jku.at/ftp/pub/Preprints/JKU-2007-02.pdf) [Local PDF](Aigner_Sir_Jüttler_2007_Least_Squares_Fitting.pdf)
 
 ### 4. Homotopy Continuation (Albrecht & Farouki 1996)
 - Connect simple initial curve to desired target
@@ -67,9 +67,9 @@ These features make PH curves ideal for CNC interpolation, motion control, and p
 
 ### 5. Theoretical and Recent Advances
 - **Weierstrass-type theorem** for PH curves (Choi & Moon 2008): they can approximate any smooth path
-- **Rational PH curves** and Minkowski-space PH curves (Kosinka & Lavička 2014)
+ - **Rational PH curves** and Minkowski-space PH curves (Kosinka & Lavička 2014) [Local PDF](Kosinka_Lavicka_2014_Survey_of_Recent_Advances.pdf)
 - **Applications in robotics**: PH curves support curvature and heading constraints
-- **High-speed CNC**: produce vibration-free motion and uniform material removal
+ - **High-speed CNC**: produce vibration-free motion and uniform material removal ([Local PDF](Farouki_Computer_numerical_control_algorithms.pdf))
 
 ## Performance Evaluation
 
@@ -92,9 +92,11 @@ PH curves offer a compelling combination of geometric flexibility and analytical
 While more complex than traditional splines, PH curve fitting methods have matured into practical tools for engineering and graphics. Algorithms range from fast local interpolators to robust global optimizers. When implemented carefully, they can dramatically improve the quality and efficiency of path-based systems.
 
 ## Recommended Reading and Downloads
-- Farouki et al. 1998: [Least-Squares Approximation with PH Curves (PDF)](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.38.7640&rep=rep1&type=pdf)
-- Aigner et al. 2007: [Evolution-Based PH Fitting (PDF)](https://www.ag.jku.at/ftp/pub/Preprints/JKU-2007-02.pdf)
-- Kosinka & Lavička 2014: *PH Curves Survey* (open access)
+ - Farouki et al. 1998: [Least-Squares Approximation with PH Curves (PDF)](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.38.7640&rep=rep1&type=pdf) [Local PDF](Farouki_Saitou_Tsai_1998_Least_Squares_Approximation_PH_Curvs.pdf)
+ - Aigner et al. 2007: [Evolution-Based PH Fitting (PDF)](https://www.ag.jku.at/ftp/pub/Preprints/JKU-2007-02.pdf) [Local PDF](Aigner_Sir_Jüttler_2007_Least_Squares_Fitting.pdf)
+ - Kosinka & Lavička 2014: *PH Curves Survey* (open access) [Local PDF](Kosinka_Lavicka_2014_Survey_of_Recent_Advances.pdf)
+ - Pastva 1998: *Bezier Curve Fitting* [Local PDF](Pastva_1998_Bezier_Curve_Fitting.pdf)
+ - Farouki: *Computer Numerical Control Algorithms* [Local PDF](Farouki_Computer_numerical_control_algorithms.pdf)
 - Farouki 2008: *Pythagorean-Hodograph Curves: Algebra and Geometry Inseparable* (book)
 
 Let me know if you'd like code implementations or tutorials for any of these methods.
