@@ -2,6 +2,8 @@
 
 This document summarises the main results of the PDF files located in the `References` folder. It also explains how these concepts relate to the current implementation of **PH-Curve** and outlines potential extensions and new features.
 
+For an overview of PH-curve fitting techniques, see [Fitting/SUMMARY.md](Fitting/SUMMARY.md).
+
 ## 1. Farouki & Saguin-Sprynski (2014)
 **C2 interpolation of spatial data subject to arc-length constraints using Pythagorean–hodograph quintic splines** ([Local PDF](Farouki_Saguin_Sprynski_2014_C2_Interpolation.pdf)) describes a method to reconstruct spatial curves when only relative distances between measurement frames are known. The authors derive two PH quintic spline formulations that enforce prescribed segment arc lengths. The problem reduces to minimising a quadratic energy subject to quadratic constraints on the PH coefficients. The key mathematical insight is that PH curves have polynomial speed \(\sigma(t)\), allowing the arc-length conditions to be expressed algebraically. The spline segments are constructed in quaternion form and the remaining degrees of freedom are fixed via shape optimisation.
 
