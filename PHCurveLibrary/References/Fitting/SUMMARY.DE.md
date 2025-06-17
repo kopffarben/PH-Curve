@@ -64,6 +64,7 @@ Diese Eigenschaften machen PH-Kurven ideal für CNC-Interpolation, Bewegungssteu
 - Verbindung einer einfachen Ausgangskurve mit Zielkurve
 - Sicherstellung \( C^2 \)-Stetigkeit zwischen PH-Segmenten
 - Lösung komplexer Interpolationsprobleme auf globaler Ebene
+- PDF-Link: [Local PDF](Fitting/Farouki_Albrecht_1996_C2_PH%20Curve_homotopy_methode.pdf)
 
 ### 5. Theorie und neuere Entwicklungen
 - **Weierstraß-Theorem** für PH-Kurven (Choi & Moon 2008): beliebig gute Approximation
@@ -98,6 +99,7 @@ Trotz der höheren Komplexität im Vergleich zu klassischen Splines haben sich P
  - Pastva 1998: *Bezier Curve Fitting* [Local PDF](Pastva_1998_Bezier_Curve_Fitting.pdf)
  - Farouki: *Computer Numerical Control Algorithms* [Local PDF](Farouki_Computer_numerical_control_algorithms.pdf)
 - Farouki 2008: *Pythagorean-Hodograph Curves: Algebra and Geometry Inseparable* (Buch)
+- Albrecht & Farouki 1996: *C²-PH-Splines per Homotopie* [Local PDF](Fitting/Farouki_Albrecht_1996_C2_PH%20Curve_homotopy_methode.pdf)
 
 Gib mir Bescheid, wenn du eine Implementierung, Grafiken oder eine LaTeX/PDF-Version benötigst.
 

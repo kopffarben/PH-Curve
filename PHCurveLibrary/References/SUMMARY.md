@@ -28,6 +28,9 @@ The paper titled **Global well-posedness of strong solutions to the 3D primitive
 ## 8. Arrizabalaga et al. (2024)
 **PHODCOS: Pythagorean Hodograph-based Differentiable Coordinate System** ([Local PDF](Arrizabalaga_et_al_2024_PHODCOS.pdf)) ([source](https://github.com/jonarriza96/phodcos))  introduces a differentiable moving frame defined via PH curves, providing exact derivatives for advanced robotic guidance.
 
+## 9. Albrecht & Farouki (1996)
+**Construction of C² Pythagorean-hodograph interpolating splines by the homotopy method** ([Local PDF](Fitting/Farouki_Albrecht_1996_C2_PH%20Curve_homotopy_methode.pdf)) presents a homotopy continuation approach to compute all PH quintic splines that satisfy C² conditions for given data points. The resulting curves offer smoother bending energy than ordinary cubics and yield rational offsets with polynomial arc length.
+
 ## Relation to the Implementation
 The `PHCurveLibrary` project mirrors many concepts from the literature:
 - `PHCurve3D` represents a quintic PH segment defined by its hodograph coefficients A–E and offers methods for position, derivatives, speed and arc length. It also computes Frenet-frame vectors.

@@ -70,7 +70,7 @@ Each fitting agent is responsible for one algorithm and provides both fixed and 
 
 ## 4. Homotopy Continuation
 
-- **Reference:** [Albrecht & Farouki 1996](PHCurveLibrary/References/Schroecker_Sir_2023_Optimal_Interpolation_with_Spatial_Rational_PH_Curves.pdf)
+- **Reference:** [Albrecht & Farouki 1996](PHCurveLibrary/References/Fitting/Farouki_Albrecht_1996_C2_PH%20Curve_homotopy_methode.pdf)
 - **Idea:** Start from a simple curve and deform it via a homotopy parameter towards the final solution while keeping G² conditions.
 - **Advantages:**
   - Avoids abrupt changes and can follow multiple valid solutions.
