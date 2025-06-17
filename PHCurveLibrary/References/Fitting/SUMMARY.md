@@ -64,6 +64,7 @@ These features make PH curves ideal for CNC interpolation, motion control, and p
 - Connect simple initial curve to desired target
 - Ensure \( C^2 \) continuity across PH segments
 - Solve complex interpolation problems globally
+- PDF link: [Local PDF](Fitting/Farouki_Albrecht_1996_C2_PH%20Curve_homotopy_methode.pdf)
 
 ### 5. Theoretical and Recent Advances
 - **Weierstrass-type theorem** for PH curves (Choi & Moon 2008): they can approximate any smooth path
@@ -98,6 +99,7 @@ While more complex than traditional splines, PH curve fitting methods have matur
  - Pastva 1998: *Bezier Curve Fitting* [Local PDF](Pastva_1998_Bezier_Curve_Fitting.pdf)
  - Farouki: *Computer Numerical Control Algorithms* [Local PDF](Farouki_Computer_numerical_control_algorithms.pdf)
 - Farouki 2008: *Pythagorean-Hodograph Curves: Algebra and Geometry Inseparable* (book)
+- Albrecht & Farouki 1996: *C² PH Splines via Homotopy* [Local PDF](Fitting/Farouki_Albrecht_1996_C2_PH%20Curve_homotopy_methode.pdf)
 
 Let me know if you'd like code implementations or tutorials for any of these methods.
 

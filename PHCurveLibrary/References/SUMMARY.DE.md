@@ -26,6 +26,9 @@ Die Arbeit **Global well-posedness of strong solutions to the 3D primitive equat
 ## 8. Arrizabalaga et al. (2024)
 **PHODCOS: Pythagorean Hodograph-based Differentiable Coordinate System** ([Lokale PDF](Arrizabalaga_et_al_2024_PHODCOS.pdf)) beschreibt ein differenzierbares Koordinatensystem entlang einer Kurve, das mittels PH-Kurven exakte Ableitungen liefert und damit präzise robotische Navigation ermöglicht.
 
+## 9. Albrecht & Farouki (1996)
+**Construction of C² Pythagorean-hodograph interpolating splines by the homotopy method** ([Lokale PDF](Fitting/Farouki_Albrecht_1996_C2_PH%20Curve_homotopy_methode.pdf)) stellt eine Homotopie-Methode vor, mit der alle C²-PH-Quintiksplines berechnet werden, die vorgegebene Punkte interpolieren. Durch Bewertung der Biegeenergie wird eine besonders glatte Lösung ausgewählt, deren Offsets rational und deren Bogenlänge polynomiell sind.
+
 ## Bezug zur Implementierung
 Unsere Bibliothek setzt viele dieser Konzepte um:
 - `PHCurve3D` stellt ein Quintik-Segment über die Hodograph-Koeffizienten A–E dar und liefert Position, Ableitungen, Geschwindigkeit und Bogenlänge.
