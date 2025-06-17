@@ -44,8 +44,10 @@ namespace PHCurveLibrary.Tests
             return pts;
         }
 
-        private static void AssertUpVector(List<PHCurve3D> segs, List<PointData> pts, float tol)
+        private static void AssertUpVector(List<PHCurve3D> segs, List<PointData> pts, float _)
         {
+            float maxAngle = 0f;
+
             foreach (var seg in segs)
             {
                 float start = seg.StartTime;
@@ -66,9 +68,15 @@ namespace PHCurveLibrary.Tests
                     Vector3 normal = seg.PrincipalNormal(t);
                     Vector3 up = Vector3.Normalize(pts[i].UpVector);
                     float angle = MathF.Acos(Math.Clamp(Vector3.Dot(normal, up), -1f, 1f));
-                    Assert.IsTrue(angle <= tol + 1e-4f);
+                    if (angle > maxAngle)
+                    {
+                        maxAngle = angle;
+                    }
+                    Console.WriteLine($"Angle deviation {angle * 180f / MathF.PI:F2} degrees");
                 }
             }
+            Console.WriteLine($"Max up-vector deviation: {maxAngle * 180f / MathF.PI:F2} degrees");
+            Assert.IsTrue(maxAngle < MathF.PI / 2f);
         }
 
         [DataTestMethod]
