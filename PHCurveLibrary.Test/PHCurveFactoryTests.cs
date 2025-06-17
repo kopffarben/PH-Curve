@@ -227,12 +227,13 @@ namespace PHCurveLibrary.Tests
 
             Vector3 expected0 = p0.PrincipalNormal * (p0.Curvature * p0.Tangent.LengthSquared());
             Vector3 expectedDelta = p1.PrincipalNormal * (p1.Curvature * p1.Tangent.LengthSquared());
+            Vector3 expectedChange = expectedDelta - expected0;
 
             Vector3 d0 = curve.SecondDerivative(0f);
             Vector3 d1 = curve.SecondDerivative(1f);
 
             Assert.IsTrue(Vector3.Distance(expected0, d0) < 1e-5f);
-            Assert.IsTrue(Vector3.Distance(d1 - d0, expectedDelta) < 1e-5f);
+            Assert.IsTrue(Vector3.Distance(d1 - d0, expectedChange) < 1e-5f);
         }
 
         /// <summary>
