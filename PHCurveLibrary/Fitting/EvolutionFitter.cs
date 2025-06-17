@@ -183,7 +183,9 @@ namespace PHCurveLibrary.Fitting
             {
                 PHCurve3D seg = FindSegment(segs, p.Time);
                 float u = (p.Time - seg.StartTime) / (seg.EndTime - seg.StartTime);
-                Vector3 curvePos = seg.Position(u);
+                int idx = reference.FindIndex(pt => Math.Abs(pt.Time - seg.StartTime) < 1e-6f);
+                Vector3 origin = idx >= 0 ? reference[idx].Position : Vector3.Zero;
+                Vector3 curvePos = seg.Position(u) + origin;
                 float d = Vector3.Distance(curvePos, p.Position);
                 if (d > maxPos)
                 {

@@ -61,11 +61,12 @@ namespace PHCurveLibrary.Fitting
                 float bestErr = float.MaxValue;
                 PHCurve3D bestSeg = default;
 
+                Vector3 origin = pts[start].Position;
                 for (int end = start + 1; end < pts.Count; ++end)
                 {
                     float segDuration = pts[end].Time - pts[start].Time;
-                    HermiteControlPoint3D h0 = BuildHermitePoint(pts, ups, start, segDuration);
-                    HermiteControlPoint3D h1 = BuildHermitePoint(pts, ups, end, segDuration);
+                    HermiteControlPoint3D h0 = BuildHermitePoint(pts, ups, start, segDuration, origin);
+                    HermiteControlPoint3D h1 = BuildHermitePoint(pts, ups, end, segDuration, origin);
 
                     PHCurve3D seg = PHCurveFactory.CreateQuintic(
                         h0,
@@ -73,7 +74,7 @@ namespace PHCurveLibrary.Fitting
                         pts[start].Time,
                         pts[end].Time);
 
-                    float posErr = ComputeMaxDeviation(seg, pts, start, end, out float oriErr);
+                    float posErr = ComputeMaxDeviation(seg, pts, start, end, out float oriErr, origin);
                     float worst = MathF.Max(posErr / posTol, oriErr / MathF.Max(oriTol, 1e-6f));
 
                     if (worst <= 1f)
@@ -126,7 +127,7 @@ namespace PHCurveLibrary.Fitting
             }
 
             HermiteControlPoint3D start = new(
-                previous.Position(1f),
+                Vector3.Zero,
                 previous.TangentUnit(1f),
                 previous.Curvature(1f),
                 previous.PrincipalNormal(1f));
@@ -144,7 +145,8 @@ namespace PHCurveLibrary.Fitting
             List<PointData> pts,
             Vector3[] ups,
             int index,
-            float scale)
+            float scale,
+            Vector3 origin)
         {
             Vector3 tangent;
             float dt;
@@ -189,7 +191,7 @@ namespace PHCurveLibrary.Fitting
 
             normal = Vector3.Normalize(normal);
 
-            return new HermiteControlPoint3D(pts[index].Position, tangent, curvature, normal);
+            return new HermiteControlPoint3D(pts[index].Position - origin, tangent, curvature, normal);
         }
 
         private static Vector3[] PrepareUpVectors(List<PointData> pts)
@@ -220,7 +222,8 @@ namespace PHCurveLibrary.Fitting
             List<PointData> pts,
             int startIdx,
             int endIdx,
-            out float maxOri)
+            out float maxOri,
+            Vector3 origin)
         {
             float maxPos = 0f;
             maxOri = 0f;
@@ -235,7 +238,7 @@ namespace PHCurveLibrary.Fitting
             for (int i = startIdx; i <= endIdx; ++i)
             {
                 float u = (pts[i].Time - t0) / dt;
-                Vector3 pos = seg.Position(u);
+                Vector3 pos = seg.Position(u) + origin;
                 float d = Vector3.Distance(pos, pts[i].Position);
                 if (d > maxPos)
                 {
