@@ -37,7 +37,7 @@ namespace PHCurveLibrary
             Vector3 deltaP = p1.Position - p0.Position;
             Vector3 P = deltaP - A - B * 0.5f;
             Vector3 Tan = T1 - A - B;
-            Vector3 K1 = p1.PrincipalNormal * (p1.Curvature * T1.LengthSquared());
+            Vector3 K1 = p1.PrincipalNormal * (p1.Curvature * T1.LengthSquared()) - B;
 
             var M3 = Matrix<float>.Build.DenseOfArray(new float[,]
             {

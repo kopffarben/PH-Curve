@@ -223,10 +223,10 @@ namespace PHCurveLibrary.Fitting
                 previous.PrincipalNormal(1f));
 
             HermiteControlPoint3D end = new(
-                next.Position(0f),
-                next.TangentUnit(0f),
-                next.Curvature(0f),
-                next.PrincipalNormal(0f));
+                next.Position(1f),
+                next.TangentUnit(1f),
+                next.Curvature(1f),
+                next.PrincipalNormal(1f));
 
             return PHCurveFactory.CreateQuintic(start, end, next.StartTime, next.EndTime);
         }

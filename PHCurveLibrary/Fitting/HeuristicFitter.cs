@@ -50,7 +50,9 @@ namespace PHCurveLibrary.Fitting
             Vector3[] ups = PrepareUpVectors(pts);
 
             float distThr = posTol * 10f;
-            float timeThr = posTol * 10f;
+            // Use the average sampling period as a proxy for a time tolerance.
+            float avgStep = (pts[^1].Time - pts[0].Time) / MathF.Max(1, pts.Count - 1);
+            float timeThr = avgStep * 10f;
             float angleThr = oriTol * 5f;
 
             int start = 0;
