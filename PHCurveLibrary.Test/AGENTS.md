@@ -1,5 +1,7 @@
 # Test Suite Guidelines
 
+This test project lives alongside `PHCurveLibrary` and `PHCurveLibrary.Benchmark` in the same solution.
+
 This document defines the expectations for all tests inside the `PH-Curve.Test` project.
 
 ## Running Tests

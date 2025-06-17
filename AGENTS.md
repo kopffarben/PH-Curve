@@ -1,5 +1,12 @@
 # Agent Instructions
 
+This repository is organised as a .NET 8.0 solution.
+
+## Project Structure
+- `PHCurveLibrary` - core library implementing PH-curves.
+- `PHCurveLibrary.Test` - MSTest suite.
+- `PHCurveLibrary.Benchmark` - BenchmarkDotNet project for performance tests.
+
 This repository contains C# code targeting **.NET 8.0**. The following guidelines apply when working with this project.
 Always name the codex tasks in English.
 

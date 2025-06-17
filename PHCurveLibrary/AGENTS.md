@@ -1,5 +1,7 @@
 # AGENTS.md
 
+This library lives inside the PH-Curve solution alongside `PHCurveLibrary.Test` and `PHCurveLibrary.Benchmark`.
+
 This document outlines the agent-based architecture of the **PHCurveLibrary** for Pythagorean-Hodograph (PH) curves with G² interpolation. It describes each component (“agent”) and the core data structures, along with the underlying mathematics and key literature references.
 Ignore all commented-out instructions.
 
