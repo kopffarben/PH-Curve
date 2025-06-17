@@ -63,8 +63,9 @@ namespace PHCurveLibrary.Fitting
 
                 for (int end = start + 1; end < pts.Count; ++end)
                 {
-                    HermiteControlPoint3D h0 = BuildHermitePoint(pts, ups, start);
-                    HermiteControlPoint3D h1 = BuildHermitePoint(pts, ups, end);
+                    float segDuration = pts[end].Time - pts[start].Time;
+                    HermiteControlPoint3D h0 = BuildHermitePoint(pts, ups, start, segDuration);
+                    HermiteControlPoint3D h1 = BuildHermitePoint(pts, ups, end, segDuration);
 
                     PHCurve3D seg = PHCurveFactory.CreateQuintic(
                         h0,
@@ -77,7 +78,7 @@ namespace PHCurveLibrary.Fitting
 
                     if (worst <= 1f)
                     {
-                        if (worst < bestErr)
+                        if (worst <= bestErr)
                         {
                             bestErr = worst;
                             bestSeg = seg;
@@ -142,24 +143,37 @@ namespace PHCurveLibrary.Fitting
         private static HermiteControlPoint3D BuildHermitePoint(
             List<PointData> pts,
             Vector3[] ups,
-            int index)
+            int index,
+            float scale)
         {
             Vector3 tangent;
+            float dt;
+
             if (index < pts.Count - 1)
             {
                 tangent = pts[index + 1].Position - pts[index].Position;
+                dt = pts[index + 1].Time - pts[index].Time;
             }
             else
             {
                 tangent = pts[index].Position - pts[index - 1].Position;
+                dt = pts[index].Time - pts[index - 1].Time;
             }
 
             if (tangent.LengthSquared() < 1e-8f)
             {
                 tangent = Vector3.UnitX;
+                dt = 1f;
             }
 
-            tangent = Vector3.Normalize(tangent);
+            if (dt > 1e-6f)
+            {
+                tangent = (tangent / dt) * MathF.Abs(scale);
+            }
+            else
+            {
+                tangent = Vector3.Normalize(tangent) * MathF.Abs(scale);
+            }
 
             float curvature = 0f;
             Vector3 up = ups[index];

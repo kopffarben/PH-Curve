@@ -73,7 +73,7 @@ namespace PHCurveLibrary.Fitting
 
                     if (worst <= 1f)
                     {
-                        if (worst < bestErr)
+                        if (worst <= bestErr)
                         {
                             bestErr = worst;
                             bestSeg = seg;
@@ -122,10 +122,38 @@ namespace PHCurveLibrary.Fitting
             Vector3 dir0 = Vector3.Normalize(TangentDirection(pts, start, true));
             Vector3 dir1 = Vector3.Normalize(TangentDirection(pts, end, false));
 
+            float segDuration = pts[end].Time - pts[start].Time;
             float len0 = Vector3.Distance(pts[start + 1].Position, pts[start].Position);
+            float dt0 = pts[start + 1].Time - pts[start].Time;
+            if (len0 < 1e-3f)
+            {
+                len0 = 1f;
+                dt0 = 1f;
+            }
+            if (dt0 > 1e-6f)
+            {
+                len0 = len0 / dt0 * MathF.Abs(segDuration);
+            }
+            else
+            {
+                len0 = len0 * MathF.Abs(segDuration);
+            }
+
             float len1 = Vector3.Distance(pts[end].Position, pts[end - 1].Position);
-            if (len0 < 1e-3f) len0 = 1f;
-            if (len1 < 1e-3f) len1 = 1f;
+            float dt1 = pts[end].Time - pts[end - 1].Time;
+            if (len1 < 1e-3f)
+            {
+                len1 = 1f;
+                dt1 = 1f;
+            }
+            if (dt1 > 1e-6f)
+            {
+                len1 = len1 / dt1 * MathF.Abs(segDuration);
+            }
+            else
+            {
+                len1 = len1 * MathF.Abs(segDuration);
+            }
 
             float curv0 = EstimateCurvature(pts, ups, start);
             float curv1 = EstimateCurvature(pts, ups, end);

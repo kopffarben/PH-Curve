@@ -123,11 +123,11 @@ namespace PHCurveLibrary.Fitting
                 float residual = Vector3.Dot(normal, diff);
 
                 float t = u;
-                float jA = t;
-                float jB = 0.5f * t * t;
-                float jC = t * t * t / 3f;
-                float jD = t * t * t * t / 4f;
-                float jE = t * t * t * t * t / 5f;
+                float jA = duration * t;
+                float jB = duration * 0.5f * t * t;
+                float jC = duration * t * t * t / 3f;
+                float jD = duration * t * t * t * t / 4f;
+                float jE = duration * t * t * t * t * t / 5f;
 
                 float[] j = new float[paramCount]
                 {
