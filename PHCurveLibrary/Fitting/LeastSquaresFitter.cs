@@ -179,6 +179,12 @@ namespace PHCurveLibrary.Fitting
             }
             else
             {
+                if (m <= 2)
+                {
+                    // No interior samples to split at; fallback to straight-line segments
+                    return FallbackPolyline(pts);
+                }
+
                 // Subdivide at the point of maximum error (avoid splitting at endpoints)
                 worstIdx = Math.Clamp(worstIdx, 1, m - 2);
                 var leftPts = pts.GetRange(0, worstIdx + 1);
