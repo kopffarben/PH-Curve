@@ -184,21 +184,25 @@ namespace PHCurveLibrary.Fitting
                 // Good fit: return single segment
                 return new List<PHCurve3D> { segment };
             }
-            else
+
+            // If only two points remain we cannot subdivide further
+            if (m < 3)
             {
-                // Subdivide at the point of maximum error (avoid splitting at endpoints)
-                worstIdx = Math.Clamp(worstIdx, 1, m - 2);
-                var leftPts = pts.GetRange(0, worstIdx + 1);
-                var rightPts = pts.GetRange(worstIdx, m - worstIdx);
-                // Recursively fit left and right subsets
-                var leftRes = FitRecursive(leftPts, posTol, oriTol, depth + 1);
-                var rightRes = FitRecursive(rightPts, posTol, oriTol, depth + 1);
-                // Concatenate results
-                var results = new List<PHCurve3D>(leftRes.Count + rightRes.Count);
-                results.AddRange(leftRes);
-                results.AddRange(rightRes);
-                return results;
+                return FallbackPolyline(pts);
             }
+
+            // Subdivide at the point of maximum error (avoid splitting at endpoints)
+            worstIdx = Math.Clamp(worstIdx, 1, m - 2);
+            var leftPts = pts.GetRange(0, worstIdx + 1);
+            var rightPts = pts.GetRange(worstIdx, m - worstIdx);
+            // Recursively fit left and right subsets
+            var leftRes = FitRecursive(leftPts, posTol, oriTol, depth + 1);
+            var rightRes = FitRecursive(rightPts, posTol, oriTol, depth + 1);
+            // Concatenate results
+            var results = new List<PHCurve3D>(leftRes.Count + rightRes.Count);
+            results.AddRange(leftRes);
+            results.AddRange(rightRes);
+            return results;
         }
 
         #region Helper Methods
