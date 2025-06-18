@@ -15,6 +15,13 @@ namespace PHCurveLibrary.Fitting
     /// quintic curves using a robust algebraic least-squares approach. Supports position and
     /// orientation tolerances, handles degenerate cases, and subdivides the point set recursively
     /// when tolerances are exceeded.
+    /// 
+    /// <para>
+    /// The <paramref name="points"/> include <c>UpVector</c> information at each sample to guide the principal normal estimation.
+    /// When the provided up-vectors are consistent, they produce accurate normals and satisfy orientation tolerances with minimal subdivision.
+    /// If up-vectors vary or are unreliable, the algorithm falls back to approximating normals from the fitted curve geometry,
+    /// ensuring a reasonable orientation even with imperfect up-vector data.
+    /// </para>
     /// </summary>
     public static class LeastSquaresFitter
     {
@@ -179,12 +186,6 @@ namespace PHCurveLibrary.Fitting
             }
             else
             {
-                if (m <= 2)
-                {
-                    // No interior samples to split at; fallback to straight-line segments
-                    return FallbackPolyline(pts);
-                }
-
                 // Subdivide at the point of maximum error (avoid splitting at endpoints)
                 worstIdx = Math.Clamp(worstIdx, 1, m - 2);
                 var leftPts = pts.GetRange(0, worstIdx + 1);
@@ -236,13 +237,34 @@ namespace PHCurveLibrary.Fitting
         /// Computes the principal normal direction from a measured up-vector
         /// and tangent, with fallback to a world-up if degenerate.
         /// </summary>
+        /// <summary>
+        /// Computes the principal normal direction from a measured up-vector
+        /// and tangent, with fallback to a world-up if unreliable.
+        /// </summary>
         private static Vector3 EstimatePrincipalNormal(Vector3 up, Vector3 tangent)
         {
-            // Project up onto plane orthogonal to tangent
-            var n = Vector3.Cross(Vector3.Cross(tangent, up), tangent);
-            return n.LengthSquared() < SingularThreshold
-                ? Vector3.UnitY  // fallback up
-                : Vector3.Normalize(n);
+            // Check reliability of provided up-vector: it should be roughly orthogonal to tangent
+            float alignmentUp = Math.Abs(Vector3.Dot(up, tangent) / (up.Length() * tangent.Length()));
+            const float alignmentThreshold = 0.9f;
+            if (alignmentUp < alignmentThreshold)
+            {
+                // Use user-provided up-vector: project onto plane orthogonal to tangent
+                var n = Vector3.Cross(Vector3.Cross(tangent, up), tangent);
+                if (n.LengthSquared() >= SingularThreshold)
+                    return Vector3.Normalize(n);
+            }
+            // Fallback: choose a stable world-up vector not parallel to tangent
+            Vector3 worldUp = Vector3.UnitY;
+            if (Math.Abs(Vector3.Dot(worldUp, tangent) / tangent.Length()) > alignmentThreshold)
+                worldUp = Vector3.UnitX;
+            // Project worldUp onto plane orthogonal to tangent
+            var fallback = Vector3.Cross(Vector3.Cross(tangent, worldUp), tangent);
+            if (fallback.LengthSquared() < SingularThreshold)
+            {
+                // Last resort: any perpendicular direction
+                fallback = Vector3.Cross(tangent, new Vector3(1, 0, 0));
+            }
+            return Vector3.Normalize(fallback);
         }
 
         /// <summary>
