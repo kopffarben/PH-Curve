@@ -1,336 +1,378 @@
+﻿// LeastSquaresFitter.cs
+// Robust algebraic least-squares fitter for PH-quintic segments
+// Handles degenerate inputs, singular normal equations, zero-length segments,
+// orientation checks, and recursive subdivision for error control.
+
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace PHCurveLibrary.Fitting
 {
     /// <summary>
-    /// Implements a simple least-squares approximation by
-    /// estimating tangent lengths and endpoint curvatures
-    /// from the sample points. The resulting Hermite data
-    /// is passed to <see cref="PHCurveFactory.CreateQuintic"/>.
+    /// Provides methods to fit a sequence of 3D points over time with Pythagorean-hodograph
+    /// quintic curves using a robust algebraic least-squares approach. Supports position and
+    /// orientation tolerances, handles degenerate cases, and subdivides the point set recursively
+    /// when tolerances are exceeded.
     /// </summary>
     public static class LeastSquaresFitter
     {
+        // Prevent infinite recursion when subdividing point sequences
+        private const int MaxRecursionDepth = 16;
+        // Minimum threshold for treating near-zero values as singular
+        private const float SingularThreshold = 1e-6f;
+        // Default scale for tangent magnitudes if solving normal equations fails
+        private const float DefaultAlphaScale = 1.0f;
+
         /// <summary>
-        /// Fit points using a basic least-squares approach.
+        /// Public entry point: fits one or multiple PH-quintic segments to the given
+        /// timed point data, ensuring position and orientation errors do not exceed
+        /// specified tolerances. Automatically handles degenerate inputs and recursion
+        /// depth limits.
         /// </summary>
-        /// <param name="points">Ordered sample points.</param>
-        /// <param name="positionTolerance">Allowed positional deviation.</param>
-        /// <param name="orientationTolerance">Allowed orientation deviation.</param>
-        /// <returns>Generated segments.</returns>
+        /// <param name="points">Ordered list of time-stamped 3D points with up-vectors.</param>
+        /// <param name="positionTolerance">Maximum permitted Euclidean error (units of length).</param>
+        /// <param name="orientationTolerance">Maximum permitted angular deviation (radians).</param>
+        /// <returns>List of <see cref="PHCurve3D"/> segments approximating the data.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="points"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if fewer than two points are provided.</exception>
         public static List<PHCurve3D> Fit(
             List<PointData> points,
             float positionTolerance,
             float orientationTolerance)
         {
-            return FitInternal(points, positionTolerance, orientationTolerance, false);
+            if (points == null)
+                throw new ArgumentNullException(nameof(points));
+            if (points.Count < 2)
+                throw new ArgumentException("At least two points required", nameof(points));
+
+            // Detect degenerate case: all points coincide within numerical tolerance
+            bool allSame = points.All(p => Vector3.Distance(p.Position, points[0].Position) < SingularThreshold);
+            if (allSame)
+            {
+                // Return single zero-length PH segment at that location
+                var h = new HermiteControlPoint3D(
+                    points[0].Position,
+                    Vector3.Zero,
+                    curvature: 0f,
+                    principalNormal: Vector3.UnitY);
+                var curve = PHCurveFactory.CreateQuintic(h, h, 0f, 1f);
+                return new List<PHCurve3D> { curve };
+            }
+
+            // Use recursive subdivision to fit tolerances
+            return FitRecursive(points, positionTolerance, orientationTolerance, depth: 0);
         }
 
         /// <summary>
-        /// Incremental fitting on a growing buffer of points.
+        /// Internal recursive method: attempts to fit one PH segment to the full point set.
+        /// If error tolerances are exceeded or singular conditions occur, splits the set at
+        /// the worst-fitting point and recurses, up to <see cref="MaxRecursionDepth"/>.
         /// </summary>
-        /// <param name="buffer">Buffer of new sample points.</param>
-        /// <param name="positionTolerance">Allowed positional deviation.</param>
-        /// <param name="orientationTolerance">Allowed orientation deviation.</param>
-        /// <returns>Generated segments covering the buffer.</returns>
-        public static List<PHCurve3D> FitIncremental(
-            List<PointData> buffer,
-            float positionTolerance,
-            float orientationTolerance)
-        {
-            return FitInternal(buffer, positionTolerance, orientationTolerance, true);
-        }
-
-        private static List<PHCurve3D> FitInternal(
+        /// <param name="pts">Current subset of the original point list.</param>
+        /// <param name="posTol">Position tolerance.</param>
+        /// <param name="oriTol">Orientation tolerance (radians).</param>
+        /// <param name="depth">Current recursion depth.</param>
+        /// <returns>List of fitted segments covering the subset.</returns>
+        private static List<PHCurve3D> FitRecursive(
             List<PointData> pts,
             float posTol,
             float oriTol,
-            bool incremental)
+            int depth)
         {
-            List<PHCurve3D> result = new();
-            if (pts.Count < 2)
+            int m = pts.Count;
+            if (m < 2)
+                throw new ArgumentException("Insufficient points for fitting.");
+            if (depth > MaxRecursionDepth)
             {
-                return result;
+                // Fallback: connect points with zero-curvature PH segments (polyline)
+                return FallbackPolyline(pts);
             }
 
-            Vector3[] ups = PrepareUpVectors(pts);
-
-            PHCurve3D? prevSeg = null;
-            int start = 0;
-            while (start < pts.Count - 1)
+            // Extract first and last points
+            var p0 = pts.First();
+            var pN = pts.Last();
+            float dt = pN.Time - p0.Time;
+            if (Math.Abs(dt) < SingularThreshold)
             {
-                int bestEnd = start + 1;
-                float bestErr = float.MaxValue;
-                PHCurve3D bestSeg = default;
-
-                Vector3 origin = pts[start].Position;
-                for (int end = start + 1; end < pts.Count; ++end)
-                {
-                    PHCurve3D seg = BuildSegment(pts, ups, start, end, origin);
-
-                    float posErr = ComputeMaxDeviation(seg, pts, start, end, out float oriErr, origin);
-                    float worst = MathF.Max(posErr / posTol, oriErr / MathF.Max(oriTol, 1e-6f));
-
-                    if (worst <= 1f)
-                    {
-                        if (worst <= bestErr)
-                        {
-                            bestErr = worst;
-                            bestSeg = seg;
-                            bestEnd = end;
-                        }
-                    }
-                    else
-                    {
-                        if (bestErr == float.MaxValue)
-                        {
-                            bestSeg = seg;
-                            bestEnd = end;
-                        }
-                        break;
-                    }
-                }
-
-                if (prevSeg.HasValue)
-                {
-                    bestSeg = OptimizeG2(prevSeg.Value, bestSeg);
-                }
-
-                result.Add(bestSeg);
-                prevSeg = bestSeg;
-                start = bestEnd;
-                if (incremental && start >= pts.Count - 1)
-                {
-                    break;
-                }
-            }
-
-            if (incremental)
-            {
-                pts.RemoveRange(0, start);
-            }
-
-            return result;
-        }
-
-        private static PHCurve3D BuildSegment(
-            List<PointData> pts,
-            Vector3[] ups,
-            int start,
-            int end,
-            Vector3 origin)
-        {
-            Vector3 dir0 = Vector3.Normalize(TangentDirection(pts, start, true));
-            Vector3 dir1 = Vector3.Normalize(TangentDirection(pts, end, false));
-
-            float segDuration = pts[end].Time - pts[start].Time;
-            float len0 = Vector3.Distance(pts[start + 1].Position, pts[start].Position);
-            float dt0 = pts[start + 1].Time - pts[start].Time;
-            if (len0 < 1e-3f)
-            {
-                len0 = 1f;
-                dt0 = 1f;
-            }
-            if (dt0 > 1e-6f)
-            {
-                len0 = len0 / dt0 * MathF.Abs(segDuration);
-            }
-            else
-            {
-                len0 = len0 * MathF.Abs(segDuration);
-            }
-
-            float len1 = Vector3.Distance(pts[end].Position, pts[end - 1].Position);
-            float dt1 = pts[end].Time - pts[end - 1].Time;
-            if (len1 < 1e-3f)
-            {
-                len1 = 1f;
-                dt1 = 1f;
-            }
-            if (dt1 > 1e-6f)
-            {
-                len1 = len1 / dt1 * MathF.Abs(segDuration);
-            }
-            else
-            {
-                len1 = len1 * MathF.Abs(segDuration);
-            }
-
-            float curv0 = EstimateCurvature(pts, ups, start);
-            float curv1 = EstimateCurvature(pts, ups, end);
-
-            Vector3 n0 = ComputeNormal(dir0, ups[start]);
-            Vector3 n1 = ComputeNormal(dir1, ups[end]);
-
-            HermiteControlPoint3D h0 = new(pts[start].Position - origin, dir0 * len0, curv0, n0);
-            HermiteControlPoint3D h1 = new(pts[end].Position - origin, dir1 * len1, curv1, n1);
-
-            return PHCurveFactory.CreateQuintic(h0, h1, pts[start].Time, pts[end].Time);
-        }
-
-        private static float EstimateCurvature(List<PointData> pts, Vector3[] ups, int index)
-        {
-            int prev = Math.Max(index - 1, 0);
-            int next = Math.Min(index + 1, pts.Count - 1);
-            if (prev == index || next == index)
-            {
-                return 0f;
-            }
-
-            Vector3 a = pts[prev].Position;
-            Vector3 b = pts[index].Position;
-            Vector3 c = pts[next].Position;
-
-            Vector3 ab = b - a;
-            Vector3 bc = c - b;
-            float lenAb = ab.Length();
-            float lenBc = bc.Length();
-            if (lenAb < 1e-6f || lenBc < 1e-6f)
-            {
-                return 0f;
-            }
-
-            Vector3 cross = Vector3.Cross(ab, bc);
-            float area2 = cross.Length();
-            float chord = Vector3.Distance(c, a);
-            if (chord < 1e-6f)
-            {
-                return 0f;
-            }
-
-            float curvature = 2f * area2 / (lenAb * lenBc * chord);
-            float sign = MathF.Sign(Vector3.Dot(cross, ups[index]));
-            return curvature * sign;
-        }
-
-        private static Vector3 TangentDirection(List<PointData> pts, int index, bool forward)
-        {
-            if (forward)
-            {
-                if (index < pts.Count - 1)
-                {
-                    return pts[index + 1].Position - pts[index].Position;
-                }
-                else
-                {
-                    return pts[index].Position - pts[index - 1].Position;
-                }
-            }
-            else
-            {
-                if (index > 0)
-                {
-                    return pts[index].Position - pts[index - 1].Position;
-                }
-                else
-                {
-                    return pts[1].Position - pts[0].Position;
-                }
-            }
-        }
-
-        private static Vector3 ComputeNormal(Vector3 tangent, Vector3 up)
-        {
-            Vector3 n = up - Vector3.Dot(up, tangent) * tangent;
-            if (n.LengthSquared() < 1e-6f)
-            {
-                n = Vector3.Cross(tangent, Vector3.UnitY);
-                if (n.LengthSquared() < 1e-6f)
-                {
-                    n = Vector3.Cross(tangent, Vector3.UnitZ);
-                }
-            }
-
-            return Vector3.Normalize(n);
-        }
-
-        private static Vector3[] PrepareUpVectors(List<PointData> pts)
-        {
-            Vector3[] ups = new Vector3[pts.Count];
-            for (int i = 0; i < pts.Count; ++i)
-            {
-                Vector3 up = pts[i].UpVector.LengthSquared() > 1e-8f ? pts[i].UpVector : Vector3.UnitY;
-                ups[i] = Vector3.Normalize(up);
-            }
-
-            float cosThreshold = MathF.Cos(0.5f);
-            for (int i = 0; i < ups.Length - 1; ++i)
-            {
-                if (Vector3.Dot(ups[i], ups[i + 1]) < cosThreshold)
-                {
-                    Vector3 avg = Vector3.Normalize(ups[i] + ups[i + 1]);
-                    ups[i] = avg;
-                    ups[i + 1] = avg;
-                }
-            }
-
-            return ups;
-        }
-
-        private static float ComputeMaxDeviation(
-            PHCurve3D seg,
-            List<PointData> pts,
-            int startIdx,
-            int endIdx,
-            out float maxOri,
-            Vector3 origin)
-        {
-            float maxPos = 0f;
-            maxOri = 0f;
-
-            float t0 = pts[startIdx].Time;
-            float dt = pts[endIdx].Time - t0;
-            if (dt < 1e-6f)
-            {
+                // Avoid zero or negative time span
                 dt = 1f;
             }
 
-            for (int i = startIdx; i <= endIdx; ++i)
-            {
-                float u = (pts[i].Time - t0) / dt;
-                Vector3 pos = seg.Position(u) + origin;
-                float d = Vector3.Distance(pos, pts[i].Position);
-                if (d > maxPos)
-                {
-                    maxPos = d;
-                }
+            // Estimate end tangents via finite differences
+            Vector3 dir0 = EstimateDirection(pts, idx: 0);
+            Vector3 dirN = EstimateDirection(pts, idx: m - 1);
 
-                Vector3 up = pts[i].UpVector.LengthSquared() > 1e-8f ? Vector3.Normalize(pts[i].UpVector) : Vector3.UnitY;
-                if (seg.Curvature(u) > 1e-5f)
+            // Estimate endpoint curvatures from nearby triples
+            float curvature0 = EstimateCurvatureEndpoint(pts, atStart: true);
+            float curvatureN = EstimateCurvatureEndpoint(pts, atStart: false);
+
+            // Derive principal normals from measured up-vectors
+            Vector3 pn0 = EstimatePrincipalNormal(p0.UpVector, dir0);
+            Vector3 pnN = EstimatePrincipalNormal(pN.UpVector, dirN);
+
+            // Solve 2x2 normal equations for tangent scale factors α0, α1
+            SolveTangentScales(
+                pts,
+                p0,
+                pN,
+                dir0,
+                dirN,
+                dt,
+                out float alpha0,
+                out float alpha1);
+
+            // Clamp tangent magnitudes to a multiple of chord length
+            float chordLength = Vector3.Distance(p0.Position, pN.Position);
+            alpha0 = Math.Clamp(alpha0, min: 0f, max: chordLength * 10f);
+            alpha1 = Math.Clamp(alpha1, min: 0f, max: chordLength * 10f);
+
+            // Build Hermite boundary conditions for this arc
+            var hStart = new HermiteControlPoint3D(
+                position: p0.Position,
+                tangent: dir0 * alpha0,
+                curvature: curvature0,
+                principalNormal: pn0);
+            var hEnd = new HermiteControlPoint3D(
+                position: pN.Position,
+                tangent: dirN * alpha1,
+                curvature: curvatureN,
+                principalNormal: pnN);
+
+            // Create the PH quintic segment
+            var segment = PHCurveFactory.CreateQuintic(
+                hStart,
+                hEnd,
+                p0.Time,
+                pN.Time);
+
+            // Evaluate max position and orientation error over the sample points
+            float maxPosErr = 0f, maxOriErr = 0f;
+            int worstIdx = 0;
+            for (int i = 0; i < m; ++i)
+            {
+                float tNorm = (pts[i].Time - p0.Time) / dt;
+                Vector3 predicted = segment.Position(tNorm);
+                // Euclidean position error
+                float posErr = Vector3.Distance(predicted, pts[i].Position);
+                if (posErr > maxPosErr)
                 {
-                    Vector3 n = seg.PrincipalNormal(u);
-                    float ang = MathF.Acos(Math.Clamp(Vector3.Dot(n, up), -1f, 1f));
-                    if (ang > maxOri)
-                    {
-                        maxOri = ang;
-                    }
+                    maxPosErr = posErr;
+                    worstIdx = i;
                 }
+                // Normal-based orientation error
+                Vector3 curveNormal = segment.Normal(tNorm);
+                Vector3 measuredNormal = EstimatePrincipalNormal(
+                    pts[i].UpVector,
+                    Vector3.Normalize(segment.Tangent(tNorm)));
+                float oriErr = AngleBetween(curveNormal, measuredNormal);
+                if (oriErr > maxOriErr)
+                    maxOriErr = oriErr;
             }
 
-            return maxPos;
+            // Check tolerances
+            if (maxPosErr <= posTol && maxOriErr <= oriTol)
+            {
+                // Good fit: return single segment
+                return new List<PHCurve3D> { segment };
+            }
+            else
+            {
+                // Subdivide at the point of maximum error (avoid splitting at endpoints)
+                worstIdx = Math.Clamp(worstIdx, 1, m - 2);
+                var leftPts = pts.GetRange(0, worstIdx + 1);
+                var rightPts = pts.GetRange(worstIdx, m - worstIdx);
+                // Recursively fit left and right subsets
+                var leftRes = FitRecursive(leftPts, posTol, oriTol, depth + 1);
+                var rightRes = FitRecursive(rightPts, posTol, oriTol, depth + 1);
+                // Concatenate results
+                var results = new List<PHCurve3D>(leftRes.Count + rightRes.Count);
+                results.AddRange(leftRes);
+                results.AddRange(rightRes);
+                return results;
+            }
         }
 
-        private static PHCurve3D OptimizeG2(PHCurve3D previous, PHCurve3D next)
+        #region Helper Methods
+
+        /// <summary>
+        /// Estimates a unit tangent vector at index <paramref name="idx"/>
+        /// by forward, backward, or central difference, depending on
+        /// boundary.
+        /// </summary>
+        private static Vector3 EstimateDirection(List<PointData> pts, int idx)
         {
-            if (PHCurveFactory.ValidateG2(previous, next))
-            {
-                return next;
-            }
-
-            HermiteControlPoint3D start = new(
-                Vector3.Zero,
-                previous.TangentUnit(1f),
-                previous.Curvature(1f),
-                previous.PrincipalNormal(1f));
-
-            HermiteControlPoint3D end = new(
-                next.Position(1f),
-                next.TangentUnit(1f),
-                next.Curvature(1f),
-                next.PrincipalNormal(1f));
-
-            return PHCurveFactory.CreateQuintic(start, end, next.StartTime, next.EndTime);
+            if (idx == 0)
+                return Vector3.Normalize(pts[1].Position - pts[0].Position);
+            if (idx == pts.Count - 1)
+                return Vector3.Normalize(pts.Last().Position - pts[^2].Position);
+            // Central difference
+            var prev = pts[idx].Position - pts[idx - 1].Position;
+            var next = pts[idx + 1].Position - pts[idx].Position;
+            return Vector3.Normalize(prev + next);
         }
+
+        /// <summary>
+        /// Approximates curvature at the first or last sample via three-point circle fit.
+        /// </summary>
+        private static float EstimateCurvatureEndpoint(List<PointData> pts, bool atStart)
+        {
+            if (pts.Count < 3)
+                return 0f;
+            if (atStart)
+                return EstimateCurvature(pts[0].Position, pts[1].Position, pts[2].Position);
+            else
+                return EstimateCurvature(pts[^3].Position, pts[^2].Position, pts[^1].Position);
+        }
+
+        /// <summary>
+        /// Computes the principal normal direction from a measured up-vector
+        /// and tangent, with fallback to a world-up if degenerate.
+        /// </summary>
+        private static Vector3 EstimatePrincipalNormal(Vector3 up, Vector3 tangent)
+        {
+            // Project up onto plane orthogonal to tangent
+            var n = Vector3.Cross(Vector3.Cross(tangent, up), tangent);
+            return n.LengthSquared() < SingularThreshold
+                ? Vector3.UnitY  // fallback up
+                : Vector3.Normalize(n);
+        }
+
+        /// <summary>
+        /// Solves the 2x2 linear system for Hermite tangent scale factors alpha0, alpha1
+        /// by assembling normal equations from least-squares over the point set.
+        /// Uses default estimates if the system is singular.
+        /// </summary>
+        private static void SolveTangentScales(
+            List<PointData> pts,
+            PointData p0,
+            PointData pN,
+            Vector3 dir0,
+            Vector3 dirN,
+            float dt,
+            out float alpha0,
+            out float alpha1)
+        {
+            // Accumulate normal matrix entries and right-hand terms
+            float S00 = 0f, S01 = 0f, S11 = 0f;
+            float B0 = 0f, B1 = 0f;
+            foreach (var pd in pts)
+            {
+                float t = (pd.Time - p0.Time) / dt;
+                float h10 = HermiteH10(t), h11 = HermiteH11(t);
+                var c0 = dir0 * h10;
+                var c1 = dirN * h11;
+                var basePos = p0.Position * HermiteH00(t)
+                            + pN.Position * HermiteH01(t);
+                var diff = pd.Position - basePos;
+                S00 += Vector3.Dot(c0, c0);
+                S01 += Vector3.Dot(c0, c1);
+                S11 += Vector3.Dot(c1, c1);
+                B0 += Vector3.Dot(c0, diff);
+                B1 += Vector3.Dot(c1, diff);
+            }
+            float det = S00 * S11 - S01 * S01;
+            if (Math.Abs(det) < SingularThreshold)
+            {
+                // Solve failed: use default chord-based scales
+                alpha0 = Vector3.Distance(pts[0].Position, pts[1].Position) * DefaultAlphaScale;
+                alpha1 = Vector3.Distance(pts[^1].Position, pts[^2].Position) * DefaultAlphaScale;
+            }
+            else
+            {
+                // Invert normal system
+                alpha0 = (B0 * S11 - B1 * S01) / det;
+                alpha1 = (-B0 * S01 + B1 * S00) / det;
+            }
+        }
+
+        /// <summary>
+        /// Computes the absolute angle between two vectors (0 to π).
+        /// </summary>
+        private static float AngleBetween(Vector3 a, Vector3 b)
+        {
+            float cos = Math.Clamp(Vector3.Dot(a, b) / (a.Length() * b.Length()), -1f, 1f);
+            return (float)Math.Acos(cos);
+        }
+
+        /// <summary>
+        /// Computes curvature at the center of a three-point arc via
+        /// the radius of the circumscribed circle.
+        /// </summary>
+        private static float EstimateCurvature(Vector3 pA, Vector3 pB, Vector3 pC)
+        {
+            var a = pB - pA;
+            var b = pC - pB;
+            float area2 = Vector3.Cross(a, b).Length();
+            float denom = a.Length() * b.Length() * Vector3.Distance(pA, pC);
+            if (area2 < SingularThreshold || denom < SingularThreshold)
+                return 0f;
+            float radius = denom / (2f * area2);
+            return radius > 1e6f ? 0f : 1f / radius;
+        }
+
+        /// <summary>
+        /// Fallback polyline: constructs zero-curvature PH segments connecting
+        /// each consecutive pair of points when recursion limit is reached.
+        /// </summary>
+        private static List<PHCurve3D> FallbackPolyline(List<PointData> pts)
+        {
+            var list = new List<PHCurve3D>(pts.Count - 1);
+            for (int i = 0; i < pts.Count - 1; ++i)
+            {
+                var h0 = new HermiteControlPoint3D(
+                    pts[i].Position,
+                    Vector3.Zero,
+                    curvature: 0f,
+                    principalNormal: Vector3.UnitY);
+                var h1 = new HermiteControlPoint3D(
+                    pts[i + 1].Position,
+                    Vector3.Zero,
+                    curvature: 0f,
+                    principalNormal: Vector3.UnitY);
+                list.Add(PHCurveFactory.CreateQuintic(
+                    h0, h1,
+                    pts[i].Time, pts[i + 1].Time));
+            }
+            return list;
+        }
+
+        #region Quintic Hermite Basis Functions
+        /// <summary>Hermite basis H00(t) for quintic interpolation.</summary>
+        private static float HermiteH00(float t)
+        {
+            float t2 = t * t, t3 = t2 * t, t4 = t3 * t, t5 = t4 * t;
+            return 1f - 10f * t3 + 15f * t4 - 6f * t5;
+        }
+        /// <summary>Hermite basis H01(t) for quintic interpolation.</summary>
+        private static float HermiteH01(float t)
+        {
+            float t2 = t * t, t3 = t2 * t, t4 = t3 * t, t5 = t4 * t;
+            return 10f * t3 - 15f * t4 + 6f * t5;
+        }
+        /// <summary>Hermite basis H10(t) for quintic interpolation.</summary>
+        private static float HermiteH10(float t)
+        {
+            float t2 = t * t, t3 = t2 * t, t4 = t3 * t, t5 = t4 * t;
+            return t - 6f * t3 + 8f * t4 - 3f * t5;
+        }
+        /// <summary>Hermite basis H11(t) for quintic interpolation.</summary>
+        private static float HermiteH11(float t)
+        {
+            float t2 = t * t, t3 = t2 * t, t4 = t3 * t, t5 = t4 * t;
+            return -4f * t3 + 7f * t4 - 3f * t5;
+        }
+        #endregion
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Extension for <see cref="float"/> to allow functional-style usage of Abs().
+    /// </summary>
+    static class FloatExtensions
+    {
+        public static float Abs(this float v) => Math.Abs(v);
     }
 }

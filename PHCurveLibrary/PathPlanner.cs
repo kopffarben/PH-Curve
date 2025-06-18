@@ -99,7 +99,8 @@ namespace PHCurveLibrary
             return method switch
             {
                 FittingMethod.LocalHermite => LocalHermiteFitter.FitIncremental(buffer, positionTolerance, orientationTolerance),
-                FittingMethod.LeastSquares => LeastSquaresFitter.FitIncremental(buffer, positionTolerance, orientationTolerance),
+                // TODO: Implement incremental fitting for other methods
+                FittingMethod.LeastSquares => LeastSquaresFitter.Fit(buffer, positionTolerance, orientationTolerance),
                 FittingMethod.Evolution => EvolutionFitter.FitIncremental(buffer, positionTolerance, orientationTolerance),
                 FittingMethod.Homotopy => HomotopyFitter.FitIncremental(buffer, positionTolerance, orientationTolerance),
                 FittingMethod.Heuristic => HeuristicFitter.FitIncremental(buffer, positionTolerance, orientationTolerance),
